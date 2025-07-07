@@ -95,7 +95,7 @@
         >
           <button
             onclick="closeSingleImageModal()"
-            class="absolute top-[13%] right-[20%] text-white text-3xl font-bold bg-[#16161f] flex items-center justify-center rounded-full w-12 h-12 cursor-pointer"
+            class="absolute top-[30%] right-3 md:top-[15%] md:right-[10%] lg:top-[13%] lg:right-[20%] text-white text-3xl font-bold bg-[#16161f] flex items-center justify-center rounded-full w-8 h-8 lg:w-12 lg:h-12 cursor-pointer"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -112,17 +112,22 @@
               />
             </svg>
           </button>
-          <div class="relative max-w-3xl w-full px-6">
+          <div class="relative max-w-xs md:max-w-xl lg:max-w-3xl w-full px-6">
             <img
               id="singleModalImage"
               src=""
               alt=""
               class="w-full rounded shadow object-contain"
             />
+            <script>
+              document.getElementById("singleImageModal").addEventListener("click", function (e) {
+                if (e.target === this) {
+                  closeSingleImageModal();
+                }
+              });
+            </script>
           </div>
         </div>
-
-
         <!--Các ảnh còn lại-->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <% project.files.forEach((file, index) => { %> <% if(index > 0 &&
@@ -165,7 +170,7 @@
         >
           <button
             onclick="closeModal()"
-            class="absolute top-[13%] right-[20%] text-white text-3xl font-bold bg-[#16161f] flex items-center justify-center rounded-full w-12 h-12 cursor-pointer"
+            class="absolute top-[30%] right-3 md:top-[15%] md:right-[10%] lg:top-[13%] lg:right-[20%] text-white text-3xl font-bold bg-[#16161f] flex items-center justify-center rounded-full w-8 h-8 lg:w-12 lg:h-12 cursor-pointer"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -182,18 +187,25 @@
               />
             </svg>
           </button>
-          <div class="relative max-w-3xl w-full">
+          <div class="relative max-w-xs md:max-w-xl lg:max-w-3xl w-full">
             <img
               id="modalImage"
               src=""
               alt=""
               class="w-full rounded shadow cursor-pointer"
             />
+            <script>
+              document.getElementById("imageModal").addEventListener("click", function (e) {
+                if (e.target === this) {
+                  closeModal();
+                }
+              });
+            </script>
           </div>
 
           <button
             onclick="prevImage()"
-            class="absolute left-[20%] top-1/2 transform -translate-y-1/2 text-white text-4xl bg-[#16161f] flex items-center justify-center rounded-full w-12 h-12 cursor-pointer"
+            class="absolute left-1 lg:left-[20%] top-1/2 transform -translate-y-1/2 text-white text-4xl bg-[#16161f] flex items-center justify-center rounded-full w-8 h-8 lg:w-12 lg:h-12 cursor-pointer"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -212,7 +224,7 @@
           </button>
           <button
             onclick="nextImage()"
-            class="absolute right-[20%] top-1/2 transform -translate-y-1/2 text-white text-4xl bg-[#16161f] flex items-center justify-center rounded-full w-12 h-12 cursor-pointer"
+            class="absolute right-1 lg:right-[20%] top-1/2 transform -translate-y-1/2 text-white text-4xl bg-[#16161f] flex items-center justify-center rounded-full w-8 h-8 lg:w-12 lg:h-12 cursor-pointer"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
