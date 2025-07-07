@@ -20,6 +20,22 @@
       src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
       defer
     ></script>
+    <style>
+      .skeleton {
+        background: linear-gradient(90deg, #f3f3f3 25%, #e0e0e0 50%, #f3f3f3 75%);
+        background-size: 200% 100%;
+        animation: skeleton-loading 1.2s infinite;
+      }
+    
+      @keyframes skeleton-loading {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="min-h-screen">
@@ -37,33 +53,272 @@
             <%-project.projectOverview%>
           </p>
         </div>
+        <!-- Ảnh chính -->
+        <% if (project.files && project.files.length > 0) { 
+          const img = project.files[0];
+          const imgUrl = img.url;
+          const imgAlt = encodeURIComponent(img.alt || '');
+        %>
+        <div
+          class="relative group aspect-[16/9] bg-gray-100 rounded-md overflow-hidden"
+        >
+        <div class="absolute inset-0 skeleton z-10" id="mainSkeleton"></div>
+          <img
+            src="<%= imgUrl %>"
+            alt="<%= img.alt || '' %>"
+            class="w-full h-full object-cover cursor-pointer"
+            onclick="openSingleImageModal(decodeURIComponent('<%= imgUrl %>'), decodeURIComponent('<%= imgAlt %>'))"
+            onload="document.getElementById('mainSkeleton').classList.add('hidden')"
+            onerror="handleImageError(this)"
+          />
+          <div
+            class="absolute inset-0 hidden items-center justify-center bg-gray-100 cursor-pointer"
+            onclick="reloadImage(this)"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-10 h-10 text-gray-400"
+              viewBox="0 0 512 512"
+            >
+              <path
+                fill="currentColor"
+                d="M463.5 224h8.5c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5z"
+              />
+            </svg>
+          </div>
+        </div>
+        <% } %>
+        <!--Modal ảnh chính-->
+        <div
+          id="singleImageModal"
+          class="fixed inset-0 bg-black/70 z-50 hidden items-center justify-center"
+        >
+          <button
+            onclick="closeSingleImageModal()"
+            class="absolute top-[13%] right-[20%] text-white text-3xl font-bold bg-[#16161f] flex items-center justify-center rounded-full w-12 h-12 cursor-pointer"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+          <div class="relative max-w-3xl w-full px-6">
+            <img
+              id="singleModalImage"
+              src=""
+              alt=""
+              class="w-full rounded shadow object-contain"
+            />
+          </div>
+        </div>
+
+
+        <!--Các ảnh còn lại-->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <% project.files.forEach((file, index) => { %> <%
-          if(isImage(file.name)) { %>
-          <div>
+          <% project.files.forEach((file, index) => { %> <% if(index > 0 &&
+          isImage(file.name)) { %>
+          <div
+            class="relative group aspect-[4/3] bg-gray-100 rounded-md overflow-hidden"
+          >
+          <div class="absolute inset-0 skeleton z-10" id="skeleton-<%= index %>"></div>
             <img
               src="<%= file.url %>"
               alt="<%= file.alt || '' %>"
-              class="w-full object-cover rounded-md shadow"
+              class="w-full h-full object-cover cursor-pointer"
+              data-index="<%= index - 1 %>"
+              onclick="handleClickImage(this)"
+              onload="document.getElementById('skeleton-<%= index %>').classList.add('hidden')"
+              onerror="handleImageError(this)"
             />
+            <div
+              class="absolute inset-0 hidden items-center justify-center bg-gray-100 cursor-pointer"
+              onclick="reloadImage(this)"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-10 h-10 text-gray-400"
+                viewBox="0 0 512 512"
+              >
+                <path
+                  fill="currentColor"
+                  d="M463.5 224h8.5c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5z"
+                />
+              </svg>
+            </div>
           </div>
           <% } %> <% }) %>
+        </div>
+        <!-- Modal mở ảnh -->
+        <div
+          id="imageModal"
+          class="fixed inset-0 bg-black/70 z-50 hidden items-center justify-center"
+        >
+          <button
+            onclick="closeModal()"
+            class="absolute top-[13%] right-[20%] text-white text-3xl font-bold bg-[#16161f] flex items-center justify-center rounded-full w-12 h-12 cursor-pointer"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+          <div class="relative max-w-3xl w-full">
+            <img
+              id="modalImage"
+              src=""
+              alt=""
+              class="w-full rounded shadow cursor-pointer"
+            />
+          </div>
+
+          <button
+            onclick="prevImage()"
+            class="absolute left-[20%] top-1/2 transform -translate-y-1/2 text-white text-4xl bg-[#16161f] flex items-center justify-center rounded-full w-12 h-12 cursor-pointer"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          <button
+            onclick="nextImage()"
+            class="absolute right-[20%] top-1/2 transform -translate-y-1/2 text-white text-4xl bg-[#16161f] flex items-center justify-center rounded-full w-12 h-12 cursor-pointer"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
         </div>
         <div class="max-w-3xl mx-auto">
           <%project.description.forEach(description => {%>
           <div class="mb-10">
-            <h2
-            class="text-2xl md:text-3xl font-bold leading-relaxed mb-4"
-          >
-            <%= description.title %>
-          </h2>
-          <p class="text-gray-700 leading-relaxed text-base">
-            <%- description.content %>
-          </p>
+            <h2 class="text-2xl md:text-3xl font-bold leading-relaxed mb-4">
+              <%= description.title %>
+            </h2>
+            <p class="text-gray-700 leading-relaxed text-base">
+              <%- description.content %>
+            </p>
           </div>
           <% })%>
         </div>
       </section>
     </div>
   </body>
+  <script>
+    const imageFiles = JSON.parse(
+      decodeURIComponent(
+        "<%- encodeURIComponent(JSON.stringify(project.files.filter((f, i) => i > 0 && f.type === 'image'))) %>"
+      )
+    );
+
+    let currentIndex = 0;
+
+    function handleClickImage(el) {
+      currentIndex = parseInt(el.getAttribute("data-index"));
+      showImage();
+      document.getElementById("imageModal").classList.remove("hidden");
+      document.getElementById("imageModal").classList.add("flex");
+    }
+
+    function closeModal() {
+      document.getElementById("imageModal").classList.add("hidden");
+      document.getElementById("imageModal").classList.remove("flex");
+    }
+
+    function showImage() {
+      const image = imageFiles[currentIndex];
+      document.getElementById("modalImage").src = image.url;
+      document.getElementById("modalImage").alt = image.alt || "";
+    }
+
+    function nextImage() {
+      currentIndex = (currentIndex + 1) % imageFiles.length;
+      showImage();
+    }
+
+    function prevImage() {
+      currentIndex = (currentIndex - 1 + imageFiles.length) % imageFiles.length;
+      showImage();
+    }
+
+    function openSingleImageModal(url, alt = "") {
+      const modal = document.getElementById("singleImageModal");
+      const img = document.getElementById("singleModalImage");
+      img.src = url;
+      img.alt = alt;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeSingleImageModal() {
+      const modal = document.getElementById("singleImageModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+    function handleImageError(img) {
+      const wrapper = img.closest(".relative");
+      if (!wrapper) return;
+
+      img.classList.add("hidden");
+
+      const fallback = wrapper.querySelector(".absolute");
+      if (fallback) {
+        fallback.classList.remove("hidden");
+        fallback.classList.add("flex");
+      }
+    }
+
+    function reloadImage(btn) {
+      const fallback = btn.closest(".absolute");
+      const wrapper = btn.closest(".relative");
+      const img = wrapper.querySelector("img");
+      if (!img || !fallback) return;
+      fallback.classList.remove("flex");
+      fallback.classList.add("hidden");
+      img.classList.remove("hidden");
+      const originalSrc = img.src.split("?")[0];
+      img.src = `${originalSrc}?t=${Date.now()}`;
+    }
+  </script>
 </html>
