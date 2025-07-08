@@ -168,8 +168,7 @@ function renderImage({
       img.src = originalSrc + '?t=' + Date.now();
     }
     </script>
-    `;
-    _imageModalScriptInjected = true;
+    `
   }
 
   // Đăng ký ảnh vào danh sách modal (cho next/prev)
