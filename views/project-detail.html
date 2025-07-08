@@ -61,82 +61,37 @@
         <!-- Ảnh chính -->
         <% if (project.files && project.files.length > 0) { 
           const img = project.files[0];
-          const imgUrl = img.url;
-          const imgAlt = encodeURIComponent(img.alt || '');
         %>
-        <div
-          class="relative group aspect-[16/9] bg-gray-100 rounded-md overflow-hidden"
-        >
-          <div class="absolute inset-0 skeleton z-10" id="mainSkeleton"></div>
-          <img
-            src="<%= imgUrl %>"
-            alt="<%= img.alt || '' %>"
-            class="w-full h-full object-cover cursor-pointer"
-            onclick="openImageModal({ url: decodeURIComponent('<%= imgUrl %>'), alt: decodeURIComponent('<%= imgAlt %>') })"
-            onload="document.getElementById('mainSkeleton')?.classList.add('hidden')"
-            onerror="handleImageError(this)"
-          />
-          <div
-            class="absolute inset-0 hidden items-center justify-center bg-gray-100 cursor-pointer"
-            onclick="reloadImage(this)"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-10 h-10 text-gray-400"
-              viewBox="0 0 512 512"
-            >
-              <path
-                fill="currentColor"
-                d="M463.5 224h8.5c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5z"
-              />
-            </svg>
-          </div>
-        </div>
+          <%- helpers.renderImage({
+            url: img.url,
+            alt: img.alt || '',
+            index: null,
+            aspect: "16/9",
+            modal: true,
+            wrapperClass: "",
+            imgClass: "",
+            skeletonId: "mainSkeleton",
+            fallbackId: "mainFallback"
+          }) %>
         <% } %>
 
         <!-- Các ảnh còn lại -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <% project.files.forEach((file, index) => { %> <% if(index > 0 &&
-          isImage(file.name)) { %>
-          <div
-            class="relative group aspect-[4/3] bg-gray-100 rounded-md overflow-hidden"
-          >
-            <!-- Skeleton -->
-            <div
-              class="absolute inset-0 skeleton z-10"
-              id="skeleton-<%= index %>"
-            ></div>
-
-            <!-- Ảnh -->
-            <img
-              src="<%= file.url %>"
-              alt="<%= file.alt || '' %>"
-              class="w-full h-full object-cover cursor-pointer"
-              data-index="<%= index - 1 %>"
-              onclick="openImageModal({ url: '<%= file.url %>', alt: '<%= file.alt || '' %>', index: <%= index - 1 %> })"
-              onload="document.getElementById('skeleton-<%= index %>')?.classList.add('hidden')"
-              onerror="handleImageError(this, <%= index %>)"
-            />
-
-            <!-- Fallback -->
-            <div
-              class="absolute inset-0 hidden items-center justify-center bg-gray-100 cursor-pointer z-20"
-              onclick="reloadImage(this)"
-              id="fallback-<%= index %>"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-10 h-10 text-gray-400"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  fill="currentColor"
-                  d="M463.5 224h8.5c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5z"
-                />
-              </svg>
-            </div>
-          </div>
-          <% } %> <% }) %>
+          <% project.files.forEach((file, index) => { %> 
+            <% if(index > 0 && isImage(file.name)) { %>
+              <%- helpers.renderImage({
+                url: file.url,
+                alt: file.alt || '',
+                index: index,
+                aspect: "4/3",
+                modal: true,
+                wrapperClass: "",
+                imgClass: "",
+                skeletonId: `skeleton-${index}`,
+                fallbackId: `fallback-${index}`
+              }) %>
+            <% } %> 
+          <% }) %>
         </div>
         <!-- Modal mở ảnh -->
         <div
@@ -230,7 +185,7 @@
   <script>
     const imageFiles = JSON.parse(
       decodeURIComponent(
-        "<%- encodeURIComponent(JSON.stringify(project.files.filter((f, i) => i > 0 && f.type === 'image'))) %>"
+        "<%- encodeURIComponent(JSON.stringify(project.files.filter((f, i) => i > 0 && isImage(f.name)))) %>"
       )
     );
 
@@ -246,9 +201,14 @@
       modal.classList.remove("hidden");
       modal.classList.add("flex");
 
-      currentIndex = index;
+      // Nếu index là số, thì currentIndex là index - 1 (đồng bộ với data-index)
+      if (typeof index === "number") {
+        currentIndex = index - 1;
+      } else {
+        currentIndex = null;
+      }
 
-      const isFromList = typeof index === "number" && index >= 0;
+      const isFromList = typeof index === "number" && index > 0;
       document
         .getElementById("prevBtn")
         .classList.toggle("hidden", !isFromList);
@@ -273,7 +233,7 @@
         const img = document.querySelector(`[data-index="${currentIndex}"]`);
         if (img && !img._isError) {
           const data = imageFiles[currentIndex];
-          openImageModal({ url: data.url, alt: data.alt, index: currentIndex });
+          openImageModal({ url: data.url, alt: data.alt, index: currentIndex + 1 });
           return;
         }
       } while (currentIndex !== startIndex);
@@ -284,12 +244,11 @@
 
       let startIndex = currentIndex;
       do {
-        currentIndex =
-          (currentIndex - 1 + imageFiles.length) % imageFiles.length;
+        currentIndex = (currentIndex - 1 + imageFiles.length) % imageFiles.length;
         const img = document.querySelector(`[data-index="${currentIndex}"]`);
         if (img && !img._isError) {
           const data = imageFiles[currentIndex];
-          openImageModal({ url: data.url, alt: data.alt, index: currentIndex });
+          openImageModal({ url: data.url, alt: data.alt, index: currentIndex + 1 });
           return;
         }
       } while (currentIndex !== startIndex);
@@ -324,10 +283,14 @@
 
       img.classList.add("hidden");
       img._isError = true;
-      const skeleton = document.getElementById(`skeleton-${index}`);
+      
+      const skeletonId = index !== null ? `skeleton-${index}` : "mainSkeleton";
+      const fallbackId = index !== null ? `fallback-${index}` : "mainFallback";
+      
+      const skeleton = document.getElementById(skeletonId);
       if (skeleton) skeleton.classList.add("hidden");
 
-      const fallback = document.getElementById(`fallback-${index}`);
+      const fallback = document.getElementById(fallbackId);
       if (fallback) {
         fallback.classList.remove("hidden");
         fallback.classList.add("flex");
@@ -346,6 +309,7 @@
       fallback.classList.remove("flex");
 
       img.classList.remove("hidden");
+      img._isError = false;
       skeleton.classList.remove("hidden");
 
       const originalSrc = img.src.split("?")[0];

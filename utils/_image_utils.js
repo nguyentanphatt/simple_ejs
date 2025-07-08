@@ -1,18 +1,4 @@
-/**
- * Tạo HTML ảnh có skeleton + fallback + modal onclick.
- * @param {Object} options
- * @param {string} options.url - Đường dẫn ảnh.
- * @param {string} [options.alt] - Văn bản thay thế ảnh.
- * @param {number} [options.index] - Index ảnh (dùng cho modal có prev/next).
- * @param {string} [options.aspect='4/3'] - Aspect ratio (VD: '16/9', '1/1').
- * @param {boolean} [options.modal=true] - Có bật modal khi click hay không.
- * @param {string} [options.wrapperClass=''] - Class bổ sung cho wrapper ngoài.
- * @param {string} [options.imgClass=''] - Class bổ sung cho thẻ img.
- * @param {string} [options.skeletonId] - ID của skeleton div.
- * @param {string} [options.fallbackId] - ID của fallback div.
- * @returns {string} - HTML string.
- */
-function renderImageBlock({
+function renderImage({
   url,
   alt = "",
   index = null,
@@ -44,10 +30,11 @@ function renderImageBlock({
         <img
           src="${url}"
           alt="${alt}"
+          ${index !== null ? `data-index="${index - 1}"` : ""}
           class="w-full h-full object-cover cursor-pointer ${imgClass}"
           ${onClick ? `onclick="${onClick}"` : ""}
           onload="document.getElementById('${finalSkeletonId}')?.classList.add('hidden')"
-          onerror="handleImageError(this${index !== null ? `, ${index}` : ""})"
+          onerror="handleImageError(this${index !== null ? `, ${index}` : ", null"})"
         />
   
         <!-- Fallback -->
@@ -63,3 +50,6 @@ function renderImageBlock({
       </div>
     `;
 }
+
+module.exports = {renderImage}
+
