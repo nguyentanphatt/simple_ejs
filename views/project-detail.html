@@ -22,11 +22,16 @@
     ></script>
     <style>
       .skeleton {
-        background: linear-gradient(90deg, #f3f3f3 25%, #e0e0e0 50%, #f3f3f3 75%);
+        background: linear-gradient(
+          90deg,
+          #f3f3f3 25%,
+          #e0e0e0 50%,
+          #f3f3f3 75%
+        );
         background-size: 200% 100%;
         animation: skeleton-loading 1.2s infinite;
       }
-    
+
       @keyframes skeleton-loading {
         0% {
           background-position: 200% 0;
@@ -62,13 +67,13 @@
         <div
           class="relative group aspect-[16/9] bg-gray-100 rounded-md overflow-hidden"
         >
-        <div class="absolute inset-0 skeleton z-10" id="mainSkeleton"></div>
+          <div class="absolute inset-0 skeleton z-10" id="mainSkeleton"></div>
           <img
             src="<%= imgUrl %>"
             alt="<%= img.alt || '' %>"
             class="w-full h-full object-cover cursor-pointer"
-            onclick="openSingleImageModal(decodeURIComponent('<%= imgUrl %>'), decodeURIComponent('<%= imgAlt %>'))"
-            onload="document.getElementById('mainSkeleton').classList.add('hidden')"
+            onclick="openImageModal({ url: decodeURIComponent('<%= imgUrl %>'), alt: decodeURIComponent('<%= imgAlt %>') })"
+            onload="document.getElementById('mainSkeleton')?.classList.add('hidden')"
             onerror="handleImageError(this)"
           />
           <div
@@ -88,66 +93,36 @@
           </div>
         </div>
         <% } %>
-        <!--Modal ảnh chính-->
-        <div
-          id="singleImageModal"
-          class="fixed inset-0 bg-black/70 z-50 hidden items-center justify-center"
-        >
-          <button
-            onclick="closeSingleImageModal()"
-            class="absolute top-[30%] right-3 md:top-[15%] md:right-[10%] lg:top-[13%] lg:right-[20%] text-white text-3xl font-bold bg-[#16161f] flex items-center justify-center rounded-full w-8 h-8 lg:w-12 lg:h-12 cursor-pointer"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-          <div class="relative max-w-xs md:max-w-xl lg:max-w-3xl w-full px-6">
-            <img
-              id="singleModalImage"
-              src=""
-              alt=""
-              class="w-full rounded shadow object-contain"
-            />
-            <script>
-              document.getElementById("singleImageModal").addEventListener("click", function (e) {
-                if (e.target === this) {
-                  closeSingleImageModal();
-                }
-              });
-            </script>
-          </div>
-        </div>
-        <!--Các ảnh còn lại-->
+
+        <!-- Các ảnh còn lại -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <% project.files.forEach((file, index) => { %> <% if(index > 0 &&
           isImage(file.name)) { %>
           <div
             class="relative group aspect-[4/3] bg-gray-100 rounded-md overflow-hidden"
           >
-          <div class="absolute inset-0 skeleton z-10" id="skeleton-<%= index %>"></div>
+            <!-- Skeleton -->
+            <div
+              class="absolute inset-0 skeleton z-10"
+              id="skeleton-<%= index %>"
+            ></div>
+
+            <!-- Ảnh -->
             <img
               src="<%= file.url %>"
               alt="<%= file.alt || '' %>"
               class="w-full h-full object-cover cursor-pointer"
               data-index="<%= index - 1 %>"
-              onclick="handleClickImage(this)"
-              onload="document.getElementById('skeleton-<%= index %>').classList.add('hidden')"
-              onerror="handleImageError(this)"
+              onclick="openImageModal({ url: '<%= file.url %>', alt: '<%= file.alt || '' %>', index: <%= index - 1 %> })"
+              onload="document.getElementById('skeleton-<%= index %>')?.classList.add('hidden')"
+              onerror="handleImageError(this, <%= index %>)"
             />
+
+            <!-- Fallback -->
             <div
-              class="absolute inset-0 hidden items-center justify-center bg-gray-100 cursor-pointer"
+              class="absolute inset-0 hidden items-center justify-center bg-gray-100 cursor-pointer z-20"
               onclick="reloadImage(this)"
+              id="fallback-<%= index %>"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -169,7 +144,7 @@
           class="fixed inset-0 bg-black/70 z-50 hidden items-center justify-center"
         >
           <button
-            onclick="closeModal()"
+            onclick="closeImageModal()"
             class="absolute top-[30%] right-3 md:top-[15%] md:right-[10%] lg:top-[13%] lg:right-[20%] text-white text-3xl font-bold bg-[#16161f] flex items-center justify-center rounded-full w-8 h-8 lg:w-12 lg:h-12 cursor-pointer"
           >
             <svg
@@ -194,16 +169,10 @@
               alt=""
               class="w-full rounded shadow cursor-pointer"
             />
-            <script>
-              document.getElementById("imageModal").addEventListener("click", function (e) {
-                if (e.target === this) {
-                  closeModal();
-                }
-              });
-            </script>
           </div>
 
           <button
+            id="prevBtn"
             onclick="prevImage()"
             class="absolute left-1 lg:left-[20%] top-1/2 transform -translate-y-1/2 text-white text-4xl bg-[#16161f] flex items-center justify-center rounded-full w-8 h-8 lg:w-12 lg:h-12 cursor-pointer"
           >
@@ -223,6 +192,7 @@
             </svg>
           </button>
           <button
+            id="nextBtn"
             onclick="nextImage()"
             class="absolute right-1 lg:right-[20%] top-1/2 transform -translate-y-1/2 text-white text-4xl bg-[#16161f] flex items-center justify-center rounded-full w-8 h-8 lg:w-12 lg:h-12 cursor-pointer"
           >
@@ -264,57 +234,100 @@
       )
     );
 
-    let currentIndex = 0;
+    let currentIndex = null;
 
-    function handleClickImage(el) {
-      currentIndex = parseInt(el.getAttribute("data-index"));
-      showImage();
-      document.getElementById("imageModal").classList.remove("hidden");
-      document.getElementById("imageModal").classList.add("flex");
+    function openImageModal({ url, alt = "", index = null }) {
+      const modal = document.getElementById("imageModal");
+      const img = document.getElementById("modalImage");
+
+      img.src = url;
+      img.alt = alt;
+
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+
+      currentIndex = index;
+
+      const isFromList = typeof index === "number" && index >= 0;
+      document
+        .getElementById("prevBtn")
+        .classList.toggle("hidden", !isFromList);
+      document
+        .getElementById("nextBtn")
+        .classList.toggle("hidden", !isFromList);
     }
 
-    function closeModal() {
-      document.getElementById("imageModal").classList.add("hidden");
-      document.getElementById("imageModal").classList.remove("flex");
-    }
-
-    function showImage() {
-      const image = imageFiles[currentIndex];
-      document.getElementById("modalImage").src = image.url;
-      document.getElementById("modalImage").alt = image.alt || "";
+    function closeImageModal() {
+      const modal = document.getElementById("imageModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+      currentIndex = null;
     }
 
     function nextImage() {
-      currentIndex = (currentIndex + 1) % imageFiles.length;
-      showImage();
+      if (currentIndex === null || !imageFiles.length) return;
+
+      let startIndex = currentIndex;
+      do {
+        currentIndex = (currentIndex + 1) % imageFiles.length;
+        const img = document.querySelector(`[data-index="${currentIndex}"]`);
+        if (img && !img._isError) {
+          const data = imageFiles[currentIndex];
+          openImageModal({ url: data.url, alt: data.alt, index: currentIndex });
+          return;
+        }
+      } while (currentIndex !== startIndex);
     }
 
     function prevImage() {
-      currentIndex = (currentIndex - 1 + imageFiles.length) % imageFiles.length;
-      showImage();
+      if (currentIndex === null || !imageFiles.length) return;
+
+      let startIndex = currentIndex;
+      do {
+        currentIndex =
+          (currentIndex - 1 + imageFiles.length) % imageFiles.length;
+        const img = document.querySelector(`[data-index="${currentIndex}"]`);
+        if (img && !img._isError) {
+          const data = imageFiles[currentIndex];
+          openImageModal({ url: data.url, alt: data.alt, index: currentIndex });
+          return;
+        }
+      } while (currentIndex !== startIndex);
     }
 
-    function openSingleImageModal(url, alt = "") {
-      const modal = document.getElementById("singleImageModal");
-      const img = document.getElementById("singleModalImage");
-      img.src = url;
-      img.alt = alt;
-      modal.classList.remove("hidden");
-      modal.classList.add("flex");
-    }
+    document.addEventListener("click", (e) => {
+      const modal = document.getElementById("imageModal");
+      if (!modal.classList.contains("hidden") && e.target === modal) {
+        closeImageModal();
+      }
+    });
 
-    function closeSingleImageModal() {
-      const modal = document.getElementById("singleImageModal");
-      modal.classList.add("hidden");
-      modal.classList.remove("flex");
-    }
-    function handleImageError(img) {
+    document.addEventListener("keydown", (e) => {
+      const modal = document.getElementById("imageModal");
+      if (modal.classList.contains("hidden")) return;
+      switch (e.key) {
+        case "Escape":
+          closeImageModal();
+          break;
+        case "ArrowRight":
+          nextImage();
+          break;
+        case "ArrowLeft":
+          prevImage();
+          break;
+      }
+    });
+
+    function handleImageError(img, index) {
       const wrapper = img.closest(".relative");
       if (!wrapper) return;
 
       img.classList.add("hidden");
+      img._isError = true;
+      const skeleton = document.getElementById(`skeleton-${index}`);
+      if (skeleton) skeleton.classList.add("hidden");
 
-      const fallback = wrapper.querySelector(".absolute");
+      const fallback = document.getElementById(`fallback-${index}`);
       if (fallback) {
         fallback.classList.remove("hidden");
         fallback.classList.add("flex");
@@ -322,13 +335,19 @@
     }
 
     function reloadImage(btn) {
-      const fallback = btn.closest(".absolute");
       const wrapper = btn.closest(".relative");
       const img = wrapper.querySelector("img");
-      if (!img || !fallback) return;
-      fallback.classList.remove("flex");
+      const fallback = btn;
+      const skeleton = wrapper.querySelector(".skeleton");
+
+      if (!img || !fallback || !skeleton) return;
+
       fallback.classList.add("hidden");
+      fallback.classList.remove("flex");
+
       img.classList.remove("hidden");
+      skeleton.classList.remove("hidden");
+
       const originalSrc = img.src.split("?")[0];
       img.src = `${originalSrc}?t=${Date.now()}`;
     }
