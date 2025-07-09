@@ -1,7 +1,6 @@
 import { Router } from "express";
 import fs from "fs";
 import path from "path";
-import { renderImage } from "../utils/_image_utils.js";
 const router = Router();
 const filePath = path.join(process.cwd(), "data", "data.json");
 router.get("/project-detail", (req, res) => {
@@ -10,9 +9,6 @@ router.get("/project-detail", (req, res) => {
 
   res.render("project-detail", {
     project: projectData,
-    helpers: {
-      renderImage,
-    },
   });
 });
 

@@ -1,25 +1,16 @@
-<%
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg'];
-
-  function isImage(filename) {
-    if (typeof filename === 'string' && filename.indexOf('.') !== -1) {
-      const fileExtension = filename.substring(filename.lastIndexOf('.')).toLowerCase();
-      return imageExtensions.includes(fileExtension);
-    }
-    return false;
-  }
-%>
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Template 1</title>
+    <script src="/js/_image_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script
       src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
       defer
     ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs/0.4.3/fingerprint.min.js" integrity="sha512-AoIagR7lcH4NCvJqKXxUCBFTpJjSKwEN8+RnWAHhXIN9strU2y4fEMguDgVbO8piyjmOf/aeZXWqpkCTmDFBGQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
       .skeleton {
         background: linear-gradient(
@@ -58,41 +49,12 @@
             <%-project.projectOverview%>
           </p>
         </div>
+        
         <!-- Ảnh chính -->
-        <% if (project.files && project.files.length > 0) { 
-          const img = project.files[0];
-        %>
-          <%- helpers.renderImage({
-            url: img.url,
-            alt: img.alt || '',
-            index: null,
-            aspect: "16/9",
-            modal: true,
-            wrapperClass: "",
-            imgClass: "",
-            skeletonId: "mainSkeleton",
-            fallbackId: "mainFallback"
-          }) %>
-        <% } %>
+        <div id="main-image-container"></div>
 
         <!-- Các ảnh còn lại -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <% project.files.forEach((file, index) => { %> 
-            <% if(index > 0 && isImage(file.name)) { %>
-              <%- helpers.renderImage({
-                url: file.url,
-                alt: file.alt || '',
-                index: index,
-                aspect: "4/3",
-                modal: true,
-                wrapperClass: "",
-                imgClass: "",
-                skeletonId: `skeleton-${index}`,
-                fallbackId: `fallback-${index}`
-              }) %>
-            <% } %> 
-          <% }) %>
-        </div>
+        <div id="images-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
         
         <div class="max-w-3xl mx-auto">
           <%project.description.forEach(description => {%>
@@ -108,5 +70,60 @@
         </div>
       </section>
     </div>
+
+    <script>
+      // Server data
+      const projectData = {
+        files: JSON.parse('<%- JSON.stringify(project.files || []) %>')
+      };
+
+      // Helper function to check if file is image
+      function isImage(filename) {
+        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg'];
+        if (typeof filename === 'string' && filename.indexOf('.') !== -1) {
+          const fileExtension = filename.substring(filename.lastIndexOf('.')).toLowerCase();
+          return imageExtensions.includes(fileExtension);
+        }
+        return false;
+      }
+
+      // Render images when DOM is loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        // Render main image
+        if (projectData.files && projectData.files.length > 0) {
+          const img = projectData.files[0];
+          const mainImageHTML = window.renderImage({
+            url: img.url,
+            alt: img.alt || '',
+            index: null,
+            aspect: "16/9",
+            modal: true,
+            wrapperClass: "",
+            imgClass: "",
+            skeletonId: "mainSkeleton",
+            fallbackId: "mainFallback"
+          });
+          document.getElementById('main-image-container').innerHTML = mainImageHTML;
+        }
+
+        // Render other images
+        projectData.files.forEach((file, index) => {
+          if (index > 0 && isImage(file.name)) {
+            const imageHTML = window.renderImage({
+              url: file.url,
+              alt: file.alt || '',
+              index: index,
+              aspect: "4/3",
+              modal: true,
+              wrapperClass: "",
+              imgClass: "",
+              skeletonId: `skeleton-${index}`,
+              fallbackId: `fallback-${index}`
+            });
+            document.getElementById('images-grid').innerHTML += imageHTML;
+          }
+        });
+      });
+    </script>
   </body>
 </html>
