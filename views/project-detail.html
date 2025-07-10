@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Template 1</title>
     <script src="/js/_image_utils.js"></script>
+    <script src="/js/4w_component_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script
       src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
@@ -34,6 +35,7 @@
     </style>
   </head>
   <body>
+    <div id="header-container"></div>
     <div class="min-h-screen">
       <section class="max-w-5xl mx-auto my-10 px-4 flex flex-col gap-10">
         <div class="max-w-3xl mx-auto flex flex-col gap-10">
@@ -50,6 +52,7 @@
           </p>
         </div>
         
+      
         <!-- Ảnh chính -->
         <div id="main-image-container"></div>
 
@@ -68,13 +71,30 @@
           </div>
           <% })%>
         </div>
+
+        <!-- Attachment -->
+      <div id="attachment-container"></div>
+
+        <!-- Collaborators -->
+      <div id="collaborators-container"></div>
+
+      <!-- Contact -->  
+      <div id="contact-container"></div>
       </section>
+
+      
     </div>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
 
     <script>
       // Server data
       const projectData = {
-        files: JSON.parse('<%- JSON.stringify(project.files || []) %>')
+        files: JSON.parse('<%- JSON.stringify(project.files || []) %>'),
+        link: JSON.parse('<%- JSON.stringify(project.link || []) %>'),
+        collaborators: JSON.parse('<%- JSON.stringify(project.collaborators || []) %>'),
+        settings: JSON.parse('<%- JSON.stringify(project.settings || []) %>')
       };
 
       // Helper function to check if file is image
@@ -89,6 +109,28 @@
 
       // Render images when DOM is loaded
       document.addEventListener('DOMContentLoaded', function() {
+        // Render logo
+        const headerHTML = window.renderHeader({
+          logo: {
+            url: "https://cdn.4wk.vn/mainfiles/logo/4WORK%20-%20LOGO%20SVG/4WORK%20LOGO%20-%20%20SVG-05.svg",
+            alt: "4work.click",
+            height: "h-10",
+            width: "w-auto"
+          },
+          search: true,
+          searchPlaceholder: "Search projects...",
+          authButtons: true,
+          authButtonsConfig: {
+            showLogin: true,
+            showSignup: true,
+            loginText: "Login",
+            signupText: "Sign Up",
+            loginOnClick: "handleLogin()",
+            signupOnClick: "handleSignup()"
+          }
+        });
+        document.getElementById('header-container').innerHTML = headerHTML;
+
         // Render main image
         if (projectData.files && projectData.files.length > 0) {
           const img = projectData.files[0];
@@ -105,7 +147,6 @@
           });
           document.getElementById('main-image-container').innerHTML = mainImageHTML;
         }
-
         // Render other images
         projectData.files.forEach((file, index) => {
           if (index > 0 && isImage(file.name)) {
@@ -123,6 +164,48 @@
             document.getElementById('images-grid').innerHTML += imageHTML;
           }
         });
+
+        // Render Footer (sử dụng renderSimpleLogo tự động)
+        const footerHTML = window.renderFooter({
+          logo: {
+            url: "https://cdn.4wk.vn/mainfiles/logo/4WORK%20-%20LOGO%20SVG/4WORK%20LOGO%20-%20%20SVG-06.svg",
+            alt: "4work.click"
+          }
+        });
+        document.getElementById('footer-container').innerHTML = footerHTML;
+
+        // Render Attachments
+        const attachmentHTML = window.renderAttachment({ project: projectData });
+        document.getElementById('attachment-container').innerHTML = `
+          <div class="flex justify-center gap-4 p-6 mt-12 max-w-4xl mx-auto">
+            <h2 class="flex gap-3 items-center text-lg font-bold">
+              <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M20 10.9696L11.9628 18.5497C10.9782 19.4783 9.64274 20 8.25028 20C6.85782 20 5.52239 19.4783 4.53777 18.5497C3.55315 17.6211 3 16.3616 3 15.0483C3 13.7351 3.55315 12.4756 4.53777 11.547L12.575 3.96687C13.2314 3.34779 14.1217 3 15.05 3C15.9783 3 16.8686 3.34779 17.525 3.96687C18.1814 4.58595 18.5502 5.4256 18.5502 6.30111C18.5502 7.17662 18.1814 8.01628 17.525 8.63535L9.47904 16.2154C9.15083 16.525 8.70569 16.6989 8.24154 16.6989C7.77738 16.6989 7.33224 16.525 7.00403 16.2154C6.67583 15.9059 6.49144 15.4861 6.49144 15.0483C6.49144 14.6106 6.67583 14.1907 7.00403 13.8812L14.429 6.88674"
+                  stroke="#1F2937" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                </path>
+              </svg>
+              Attachments
+            </h2>
+          </div>
+          ${attachmentHTML}
+        `;
+
+        // Render Collaborators
+        const collaboratorHTML = window.renderCollaborator({ project: projectData });
+        document.getElementById('collaborators-container').innerHTML = collaboratorHTML;
+
+        // Render Contact
+        const contactHTML = window.renderContact({ project: projectData });
+        document.getElementById('contact-container').innerHTML = contactHTML;
+
+        // Set current year after footer is rendered
+        setTimeout(() => {
+          const currentYearElement = document.getElementById('current-year');
+          if (currentYearElement) {
+            currentYearElement.textContent = new Date().getFullYear();
+          }
+        }, 0);
       });
     </script>
   </body>
