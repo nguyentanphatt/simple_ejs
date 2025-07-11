@@ -1,7 +1,16 @@
 // 4WORK Component Utils - Universal module pattern
 (function () {
 
-  // Render Logo Component
+  /**
+   * Support render logo
+   * Need: div id="logo-container"
+   * @param url: "https://cdn.4wk.vn/mainfiles/logo/4WORK%20-%20LOGO%20SVG/4WORK%20LOGO%20-%20%20SVG-05.svg"
+   * @param alt: "4work.click"
+   * @param height: "h-10"
+   * @param width: "w-auto"
+   * @param bgColor: "bg-white"
+   * @param skeletonId: "logoSkeleton"
+   */
   function renderLogo({
     url = "https://cdn.4wk.vn/mainfiles/logo/4WORK%20-%20LOGO%20SVG/4WORK%20LOGO%20-%20%20SVG-05.svg",
     alt = "4work.click",
@@ -61,7 +70,38 @@
     return `<img src="${url}" alt="${alt}" class="${height} ${width} object-contain ${bgColor} ${className}">`;
   }
 
-  // Render Header Component
+  /**
+   * Support render header with logo, search, auth buttons
+   * Need: div id="header-container"
+   * @param logo: {url, alt, height, width}
+   * @param search: true/false
+   * @param searchPlaceholder: "Search projects..."
+   * @param authButtons: true/false
+   * @param authButtonsConfig: {showLogin, showSignup, loginText, signupText, loginOnClick, signupOnClick}
+   * @param containerClass: "left-0 w-full z-50 border-b border-gray-200 px-4 py-2"
+   * @return html string
+   * @example
+   * const headerHTML = window.renderHeader({
+      logo: {
+        url: "https://cdn.4wk.vn/mainfiles/logo/4WORK%20-%20LOGO%20SVG/4WORK%20LOGO%20-%20%20SVG-05.svg",
+        alt: "4work.click",
+        height: "h-10",
+        width: "w-auto"
+      },
+      search: true,
+      searchPlaceholder: "Search projects...",
+      authButtons: true,
+      authButtonsConfig: {
+        showLogin: true,
+        showSignup: true,
+        loginText: "Login",
+        signupText: "Sign Up",
+        loginOnClick: "handleLogin()",
+        signupOnClick: "handleSignup()"
+      }
+    });
+    document.getElementById('header-container').innerHTML = headerHTML;
+   */
   function renderHeader({
     logo = {},
     search = true,
@@ -105,7 +145,21 @@
     `;
   }
 
-  // Render Search Bar Component
+  /**
+   * Support render search bar
+   * Need: div id="header-container"
+   * @param placeholder: "Search"
+   * @param maxWidth: "max-w-xs"
+   * @param containerClass: "relative hidden sm:block text-gray-500"
+   * @return html string    
+   * @example
+   * const searchHTML = window.renderSearchBar({
+   *   placeholder: "Search",
+   *   maxWidth: "max-w-xs",
+   *   containerClass: "relative hidden sm:block text-gray-500"
+   * });
+   * document.getElementById('header-container').innerHTML += searchHTML;
+   */
   function renderSearchBar({
     placeholder = "Search",
     maxWidth = "max-w-xs",
@@ -122,7 +176,15 @@
     `;
   }
 
-  // Render Auth Buttons Container
+  /**
+   * Support render auth buttons
+   * Need: div id="auth-buttons"
+   * @param containerId: "auth-buttons"
+   * @param containerClass: "space-x-4"
+   * @param showLogin: true/false
+   * @param showSignup: true/false
+   * @param loginText: "Login"
+   */
   function renderAuthButtons({
     containerId = "auth-buttons",
     containerClass = "space-x-4",
@@ -155,7 +217,23 @@
     `;
   }
 
-  // Render Footer Component
+  /**
+   * Support render footer with logo, links, copyright
+   * Need: div id="footer-container"
+   * @param logo: {url, alt, height, width}
+   * @param links: [{url, text}]
+   * @param copyright: "© Copyright 4Work. All Rights Reserved."
+   * @param containerClass: "mt-10 border-t border-gray-100"
+   * @return html string
+   * @example
+   * const footerHTML = window.renderFooter({
+   *   logo: {
+   *     url: "https://cdn.4wk.vn/mainfiles/logo/4WORK%20-%20LOGO%20SVG/4WORK%20LOGO%20-%20%20SVG-06.svg",
+   *     alt: "4work.click"
+   *   }
+   * });
+   * document.getElementById('footer-container').innerHTML = footerHTML;
+   */
   function renderFooter({
     logo = {},
     links = [],
@@ -205,23 +283,34 @@
     `;
   }
 
-  // Render Loading Spinner
-  function renderSpinner({
-    size = "w-6 h-6",
-    color = "text-blue-600",
-    containerClass = "flex justify-center items-center"
-  } = {}) {
-    return `
-      <div class="${containerClass}">
-        <svg class="animate-spin ${size} ${color}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-      </div>
-    `;
-  }
 
-  // Render Button Component
+  /**
+   * Support render button
+   * Need: div id="button-container"
+   * @param text: "Button"
+   * @param type: "button"
+   * @param variant: "primary"
+   * @param size: "md"
+   * @param disabled: false
+   * @param loading: false
+   * @param icon: null
+   * @param onClick: null
+   * @param className: ""
+   * @return html string
+   * @example
+   * const buttonHTML = window.renderButton({
+   *   text: "Button",
+   *   type: "button",
+   *   variant: "primary",
+   *   size: "md",
+   *   disabled: false,
+   *   loading: false,
+   *   icon: null,
+   *   onClick: null,
+   *   className: ""
+   * });
+   * document.getElementById('button-container').innerHTML = buttonHTML;
+   */
   function renderButton({
     text = "Button",
     type = "button",
@@ -251,7 +340,7 @@
     const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`;
 
     const iconHTML = icon ? `<span class="mr-2">${icon}</span>` : '';
-    const loadingHTML = loading ? renderSpinner({ size: "w-4 h-4", color: "text-current" }) : '';
+    const loadingHTML = loading ? '<div class="w-4 h-4 border-t-2 border-b-2 border-gray-900 rounded-full animate-spin"></div>' : '';
     const content = loading ? loadingHTML : `${iconHTML}${text}`;
 
     return `
@@ -266,7 +355,10 @@
     `;
   }
 
-  // Auth handler functions
+  /**
+   * Support handle login and signup
+   * Add more logic here
+   */
   function handleLogin() {
     window.location.href = 'https://app.4work.click/login';
   }
@@ -275,7 +367,15 @@
     window.location.href = 'https://app.4work.click/';
   }
 
-  // Render Attachments Component
+  /**
+   * Support render attachments
+   * Need: div id="attachments-container"
+   * @param project: {files: [{name, url, size}]}
+   * @return html string
+   * @example
+   * const attachmentsHTML = window.renderAttachment({ project: projectData });
+   * document.getElementById('attachments-container').innerHTML = attachmentsHTML;
+   */
   function renderAttachment({ project = {} } = {}) {
     let html = '';
     if (project.files && project.files.length > 0) {
@@ -315,7 +415,15 @@
     return html;
   }
 
-  // Render Collaborators Component
+  /**
+   * Support render collaborators
+   * Need: div id="collaborators-container"
+   * @param project: {collaborators: [{_id, googleName}]}
+   * @return html string
+   * @example
+   * const collaboratorsHTML = window.renderCollaborator({ project: projectData }); 
+   * document.getElementById('collaborators-container').innerHTML = collaboratorsHTML;
+   */
   function renderCollaborator({ project = {} } = {}) {
     if (!project.collaborators || project.collaborators.length === 0) return '';
     return `
@@ -363,7 +471,17 @@
     `;
   }
 
-  // Render Contact Component
+  /**
+   * Support render contact form
+   * Need: div id="contact-container"
+   * @param project: {settings: {quickContact: true}}
+   * @param info: {idUser: {_id, key: {public: ''}}}
+   * @param csrfToken: ''
+   * @return html string
+   * @example
+   * const contactHTML = window.renderContact({ project: projectData, info: infoData, csrfToken: csrfToken });
+   * document.getElementById('contact-container').innerHTML = contactHTML;
+   */
   function renderContact({ project = {}, info = {}, csrfToken = '' } = {}) {
     if (!project.settings || !project.settings.quickContact) return '';
     return `
@@ -385,14 +503,22 @@
             <textarea id="__message" name="message" placeholder='Message' rows="8" class="w-full rounded-md px-4 bg-gray-100 text-gray-800 text-sm pt-3 outline-blue-500 focus:bg-transparent">Hi ${info.fullName || ''}, I recently came across your project and I was really impressed by your work. I'm very interested in learning more and would love to discuss potential opportunities to collaborate or get more information on your project. Please feel free to reach out to me at your convenience, I look forward to hearing from you soon!
             </textarea>
             <button type='button' onclick="collectemail()"
-              class="text-white bg-blue-500 hover:bg-blue-600 tracking-wide rounded-md text-sm px-4 py-3 w-full !mt-6">Send</button>
+              class="text-white bg-blue-500 hover:bg-blue-600 tracking-wide rounded-md text-sm px-4 py-3 w-full !mt-6 cursor-pointer">Send</button>
           </form>
         </div>
       </div>
     `;
   }
 
-  // Render Related Projects Component
+  /**
+   * Support render related projects
+   * Need: div id="related-projects-container"
+   * @param relatedProject: [{_id, projectName, file, files, time, op_description,...}]
+   * @return html string
+   * @example
+   * const relatedHTML = window.renderRelated({ relatedProject: relatedProjectData });
+   * document.getElementById('related-projects-container').innerHTML = relatedHTML;
+   */
   function renderRelated({ relatedProject = [] } = {}) {
     if (!relatedProject || relatedProject.length === 0) return '';
     return `
@@ -431,7 +557,15 @@
     `;
   }
 
-  // Render User Info Component
+  /**
+   * Support render user info
+   * Need: div id="user-container"
+   * @param project: {_id, createdAt, updatedAt, clicks}
+   * @return html string
+   * @example
+   * const userInfoHTML = window.renderUser({ project: projectData });  
+   * document.getElementById('user-container').innerHTML = userInfoHTML;
+   */
   function renderUser({ project = {} } = {}) {
     const projectId = project._id && project._id.$oid ? project._id.$oid : project._id;
     const containerId = '__user_info_container';
@@ -549,7 +683,15 @@
     return `<div id="${containerId}" class="max-w-2xl px-6 py-6 mx-auto space-y-12"><div>Loading user info...</div></div>`;
   }
 
-  // Hover card for user profile
+  /**
+   * Support render hover card for user profile
+   * Need: div id="user-info-container"
+   * @param project: {_id, createdAt, updatedAt, clicks}
+   * @return html string
+   * @example
+   * const userInfoHTML = window.renderUser({ project: projectData });
+   * document.getElementById('user-info-container').innerHTML = userInfoHTML;
+   */
   const _embed_profile_hover = () => {
 
     const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -810,7 +952,6 @@
       renderSearchBar,
       renderAuthButtons,
       renderFooter,
-      renderSpinner,
       renderButton,
       renderAttachment,
       renderCollaborator,
@@ -826,7 +967,6 @@
     window.renderSearchBar = renderSearchBar;
     window.renderAuthButtons = renderAuthButtons;
     window.renderFooter = renderFooter;
-    window.renderSpinner = renderSpinner;
     window.renderButton = renderButton;
     window.handleLogin = handleLogin;
     window.handleSignup = handleSignup;

@@ -1,3 +1,30 @@
+/**
+ * Support for image modal, skeleton, fallback
+ * Need: div id="image-container" for 1 image, div id="images-grid" for multiple images
+ * @param url: file.url,
+ * @param alt: file.alt || '',
+ * @param index: index,
+ * @param aspect: "4/3",
+ * @param modal: true,
+ * @param wrapperClass: "", // class for wrapper div
+ * @param imgClass: "", // class for img
+ * @param skeletonId: `skeleton-${index}` for multiple images, "mainSkeleton" for 1 image
+ * @param fallbackId: `fallback-${index}` for multiple images, "mainFallback" for 1 image
+ * @return html string
+ * @example
+ * const imageHTML = window.renderImage({
+ *   url: file.url,
+ *   alt: file.alt || '',
+ *   index: index,
+ *   aspect: "4/3",
+ *   modal: true, 
+ *   wrapperClass: "",
+ *   imgClass: "",
+ *   skeletonId: `skeleton-${index}`,
+ *   fallbackId: `fallback-${index}`
+ * });
+ * document.getElementById('images-grid').innerHTML += imageHTML;
+ */
 // Universal module pattern - works on both server and client
 (function() {
   let _imageModalScriptInjected = false;

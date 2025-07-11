@@ -4,8 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Template 1</title>
-    <script src="/js/_image_utils.js"></script>
-    <script src="/js/4w_component_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script
       src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
@@ -59,7 +57,7 @@
         </div>
 
         <!-- Ảnh chính -->
-        <div id="main-image-container"></div>
+        <div id="image-container"></div>
 
         <!-- Các ảnh còn lại -->
         <div id="images-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
@@ -77,8 +75,8 @@
           <% })%>
         </div>
 
-        <!-- Attachment -->
-      <div id="attachment-container"></div>
+        <!-- Attachments -->
+      <div id="attachments-container"></div>
 
         <!-- Collaborators -->
       <div id="collaborators-container"></div>
@@ -95,7 +93,14 @@
 
     <!-- Footer -->
     <div id="footer-container"></div>
-
+  </body>
+    <script src="/js/_image_utils.js"></script>
+    <script src="/js/4w_component_utils.js"></script>
+    <script type="text/javascript" src="https://cdn.4wk.vn/libs-js/sso_4work.js"></script>
+    <% if (project.settings && project.settings.quickContact) { %>
+      <script type="text/javascript" src="https://cdn.4wk.vn/libs-js/collectemail.js"></script>
+      <script type="text/javascript" src="https://cdn.4wk.vn/libs-js/sharing_embed.js"></script>
+    <% } %>
     <script>
       // Server data
       const projectData = JSON.parse(decodeURIComponent('<%- encodeURIComponent(JSON.stringify(project)) %>'));
@@ -150,7 +155,7 @@
             skeletonId: "mainSkeleton",
             fallbackId: "mainFallback"
           });
-          document.getElementById('main-image-container').innerHTML = mainImageHTML;
+          document.getElementById('image-container').innerHTML = mainImageHTML;
         }
         // Render other images
         projectData.files.forEach((file, index) => {
@@ -181,7 +186,7 @@
 
         // Render Attachments
         const attachmentHTML = window.renderAttachment({ project: projectData });
-        document.getElementById('attachment-container').innerHTML = `
+        document.getElementById('attachments-container').innerHTML = `
           <div class="flex justify-center gap-4 p-6 mt-12 max-w-4xl mx-auto">
             <h2 class="flex gap-3 items-center text-lg font-bold">
               <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -230,5 +235,4 @@
         window._embed_profile_hover = _embed_profile_hover;
       }
     </script>
-  </body>
 </html>
