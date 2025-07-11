@@ -11,6 +11,7 @@
       src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js"
       defer
     ></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs/0.4.3/fingerprint.min.js" integrity="sha512-AoIagR7lcH4NCvJqKXxUCBFTpJjSKwEN8+RnWAHhXIN9strU2y4fEMguDgVbO8piyjmOf/aeZXWqpkCTmDFBGQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
       .skeleton {
@@ -219,6 +220,15 @@
           }
         }, 0);
       });
+
+      if (typeof window !== 'undefined') {
+        document.addEventListener('DOMContentLoaded', function() {
+          if (window._embed_profile_hover) {
+            window._embed_profile_hover().init();
+          }
+        });
+        window._embed_profile_hover = _embed_profile_hover;
+      }
     </script>
   </body>
 </html>

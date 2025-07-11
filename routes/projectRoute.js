@@ -46,7 +46,6 @@ router.get("/project-detail", (req, res) => {
     project: projectData,
     info: info,
     relatedProject: relatedDataParsed,
-    formatViews: formatViews,
   });
 });
 

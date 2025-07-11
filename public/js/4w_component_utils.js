@@ -1,6 +1,6 @@
 // 4WORK Component Utils - Universal module pattern
-(function() {
-  
+(function () {
+
   // Render Logo Component
   function renderLogo({
     url = "https://cdn.4wk.vn/mainfiles/logo/4WORK%20-%20LOGO%20SVG/4WORK%20LOGO%20-%20%20SVG-05.svg",
@@ -16,11 +16,11 @@
     // Tạo unique IDs để tránh conflict
     const uniqueSkeletonId = skeletonId + '_' + Math.random().toString(36).substr(2, 9);
     const uniqueFallbackId = fallbackId + '_' + Math.random().toString(36).substr(2, 9);
-    
+
     const skeletonHTML = showSkeleton ? `
       <div class="absolute inset-0 skeleton z-10" id="${uniqueSkeletonId}"></div>
     ` : '';
-    
+
     const fallbackHTML = showFallback ? `
       <div
         class="absolute inset-0 hidden items-center justify-center bg-gray-100 z-20"
@@ -87,7 +87,7 @@
         <i class="fa fa-search absolute top-0 left-0 ml-12 mt-1"></i>
       </div>
     ` : '';
-    
+
     const authHTML = authButtons ? renderAuthButtons(authButtonsConfig) : '';
 
     return `
@@ -139,7 +139,7 @@
       size: "sm",
       onClick: loginOnClick || "handleLogin()"
     }) : '';
-    
+
     const signupButton = showSignup ? window.renderButton({
       text: signupText,
       variant: "outline",
@@ -169,7 +169,7 @@
       url: logo.url || "https://cdn.4wk.vn/mainfiles/logo/4WORK%20-%20LOGO%20SVG/4WORK%20LOGO%20-%20%20SVG-06.svg",
       alt: logo.alt || "Logo"
     });
-    
+
     const linksHTML = links.length > 0 ? links.map(link => `
       <a href="${link.url}" class="text-sm text-gray-600 transition hover:text-[#D81B60]">${link.text}</a>
     `).join('') : `
@@ -234,7 +234,7 @@
     className = ""
   } = {}) {
     const baseClasses = "inline-flex items-center justify-center font-bold rounded-lg transition-colors cursor-pointer";
-    
+
     const variantClasses = {
       primary: "bg-blue-600 text-white hover:bg-blue-700",
       secondary: "bg-gray-600 text-white hover:bg-gray-700",
@@ -249,9 +249,9 @@
     };
 
     const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`;
-    
+
     const iconHTML = icon ? `<span class="mr-2">${icon}</span>` : '';
-    const loadingHTML = loading ? renderSpinner({size: "w-4 h-4", color: "text-current"}) : '';
+    const loadingHTML = loading ? renderSpinner({ size: "w-4 h-4", color: "text-current" }) : '';
     const content = loading ? loadingHTML : `${iconHTML}${text}`;
 
     return `
@@ -282,9 +282,9 @@
       html += `
         <ul class="flex flex-col gap-3">
           ${project.files.map(file => {
-            // Check if file is not an image
-            if (!isImage(file.name)) {
-              return `
+        // Check if file is not an image
+        if (!isImage(file.name)) {
+          return `
                 <li class="p-2 bg-gray-50 rounded-md border border-gray-200">
                   <a href="${file.url}" target="_blank"
                     class="text-blue-600 hover:text-blue-800 font-medium break-words">
@@ -292,9 +292,9 @@
                   </a>
                 </li>
               `;
-            }
-            return '';
-          }).join('')}
+        }
+        return '';
+      }).join('')}
         </ul>
       `;
     }
@@ -344,8 +344,8 @@
         <div class="mx-auto w-full max-w-2xl">
           <div class="flex flex-wrap justify-center gap-4 overflow-y-auto max-h-48">
             ${project.collaborators.map(collaborator => {
-              const id = collaborator._id && collaborator._id.$oid ? collaborator._id.$oid : collaborator._id;
-              return `
+      const id = collaborator._id && collaborator._id.$oid ? collaborator._id.$oid : collaborator._id;
+      return `
                 <a href="https://4work.click/verifybadge/${id}" target="_blank" rel="noopener noreferrer">
                   <div class="flex-shrink-0 relative group">
                     <img class="skeleton w-11 h-11 rounded-full hover-trigger"
@@ -356,7 +356,7 @@
                   </div>
                 </a>
               `;
-            }).join('')}
+    }).join('')}
           </div>
         </div>
       </div>
@@ -402,10 +402,9 @@
         </h2>
         <ul class="grid grid-cols-1 xl:grid-cols-3 gap-y-10 gap-x-6 items-start">
           ${relatedProject.map(project => {
-            const id = project._id && project._id.$oid ? project._id.$oid : project._id;
-            console.log("image", project.file);
-            const img = project.file || project.files[0].url
-            return `
+      const id = project._id && project._id.$oid ? project._id.$oid : project._id;
+      const img = project.file || project.files[0].url
+      return `
               <li class="relative flex flex-col sm:flex-row xl:flex-col items-start">
                 <div class="order-1 sm:ml-6 xl:ml-0">
                   <h3 class="mb-1 text-slate-900 font-semibold">
@@ -426,7 +425,7 @@
                 <img loading="lazy" onerror="handleImageError(this)" style="height: 25vh;" src="${img}" alt="${project.projectName || ''}" class="mb-6 shadow-md rounded-lg bg-slate-50 w-full sm:w-[300px] sm:h-auto xl:w-full xl:h-auto object-cover">
               </li>
             `;
-          }).join('')}
+    }).join('')}
         </ul>
       </div>
     `;
@@ -510,10 +509,271 @@
     `;
   }
 
+  // Hover card for user profile
+  const _embed_profile_hover = () => {
+    // Kiểm tra nếu là thiết bị di động
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      return { init: () => { } };
+    }
+    // Tạo container cho hover card
+    const hoverCard = document.createElement('div');
+    hoverCard.className = 'hover-card';
+    hoverCard.style.display = 'none';
+    hoverCard.style.position = 'absolute';
+    hoverCard.style.zIndex = '1000';
+    document.body.appendChild(hoverCard);
+    // Thêm CSS cho hover card
+    const style = document.createElement('style');
+    style.textContent = `
+      .hover-card {
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        padding: 15px;
+        max-width: 400px;
+        overflow: hidden;
+        transition: opacity 0.2s;
+        font-size: 14px;
+      }
+      .hover-trigger {
+        position: relative;
+        cursor: pointer;
+      }
+    `;
+    document.head.appendChild(style);
+    // Hàm fetch profile HTML từ API
+    /*
+    const fetchProfile = async (userId) => {
+      try {
+        const response = await fetch(`/embed/profile?id=${userId}`);
+        if (!response.ok) throw new Error('Failed to fetch profile');
+        return await response.text();
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        return '<p>Error loading profile</p>';
+      }
+    };
+    */
+    // Mockup profile HTML
+    const fetchProfile = async (userId) => {
+      // Mock data
+      const mock = {
+        username: "TrinhVanNghie",
+        systemDomain: "trinhvannghi.4work.click",
+        verifyBadge: 1,
+        slogan: "Good Day, Good Night",
+        idUser: userId,
+        createdAt: new Date().toISOString(),
+        googleName: "Trịnh Văn Nghie"
+      };
+      return `
+        <div class="w-full h-auto bg-white p-2">
+          <!-- Cover Image -->
+          <div class="relative w-full max-w-4xl mx-auto h-24 sm:h-32 md:h-40">
+            <img src="https://cdn.4wk.vn/65519d6712810a3b6ac266b7/images/20250225T040301537Z_project.jpegt" alt="Cover Image"
+              class="w-full h-full object-cover rounded-md"
+              loading="lazy" onerror="handleHoverImageError(this)">
+            <div class="absolute bottom-0 left-4 transform translate-y-1/2">
+              <img class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full border-4 border-white shadow-md"
+                src="https://cdn.4wk.vn/${mock.idUser}/favicon/120x120.png" alt="Profile" 
+                loading="lazy" onerror="handleHoverImageError(this)">
+            </div>
+          </div>
+
+          <!-- Profile Info -->
+          <div class="w-full max-w-4xl mx-auto p-4 pt-10 relative">
+            <div class="absolute top-2 right-4"><a href="https://4work.tips/${mock.username}" target="_blank"
+              class="mr-1 px-3 py-1 text-xs sm:text-sm font-medium text-gray-600 bg-white border rounded-full hover:bg-gray-100"><i
+              class="me-2 fa-regular fa-lightbulb"></i>My Tips</a>
+              <a href="https://${mock.systemDomain}/${mock.username}"
+                target="_blank"
+                class="px-3 py-1 text-xs sm:text-sm font-medium text-gray-600 bg-white border rounded-full hover:bg-gray-100"><i
+                class="me-2 fa-solid fa-briefcase"></i>My Portfolio</a></div>
+             <div>
+            <div class="flex items-center">
+              <h1 class="text-lg sm:text-xl font-semibold truncate-text">${mock.googleName}</h1>
+                ${[1, 2, 3].includes(mock.verifyBadge) ? `
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" style="vertical-align:middle;margin-left:5px">
+                <defs>
+                  <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%">
+                    <stop offset="0%" style="stop-color:gold;stop-opacity:1"></stop>
+                    <stop offset="50%" style="stop-color:#ffc107;stop-opacity:1"></stop>
+                    <stop offset="100%" style="stop-color:orange;stop-opacity:1"></stop>
+                  </linearGradient>
+                  <linearGradient id="silverGradient" x1="0%" y1="0%" x2="100%">
+                    <stop offset="0%" style="stop-color:silver;stop-opacity:1"></stop>
+                    <stop offset="50%" style="stop-color:#d3d3d3;stop-opacity:1"></stop>
+                    <stop offset="100%" style="stop-color:#a9a9a9;stop-opacity:1"></stop>
+                  </linearGradient>
+                </defs>
+                <g id="SVGRepo_iconCarrier">
+                  <path 
+                    d="M21.5609 10.7386L20.2009 9.15859C19.9409 8.85859 19.7309 8.29859 19.7309 7.89859V6.19859C19.7309 5.13859 18.8609 4.26859 17.8009 4.26859H16.1009C15.7109 4.26859 15.1409 4.05859 14.8409 3.79859L13.2609 2.43859C12.5709 1.84859 11.4409 1.84859 10.7409 2.43859L9.17086 3.80859C8.87086 4.05859 8.30086 4.26859 7.91086 4.26859H6.18086C5.12086 4.26859 4.25086 5.13859 4.25086 6.19859V7.90859C4.25086 8.29859 4.04086 8.85859 3.79086 9.15859L2.44086 10.7486C1.86086 11.4386 1.86086 12.5586 2.44086 13.2486L3.79086 14.8386C4.04086 15.1386 4.25086 15.6986 4.25086 16.0886V17.7986C4.25086 18.8586 5.12086 19.7286 6.18086 19.7286H7.91086C8.30086 19.7286 8.87086 19.9386 9.17086 20.1986L10.7509 21.5586C11.4409 22.1486 12.5709 22.1486 13.2709 21.5586L14.8509 20.1986C15.1509 19.9386 15.7109 19.7286 16.1109 19.7286H17.8109C18.8709 19.7286 19.7409 18.8586 19.7409 17.7986V16.0986C19.7409 15.7086 19.9509 15.1386 20.2109 14.8386L21.5709 13.2586C22.1509 12.5686 22.1509 11.4286 21.5609 10.7386ZM16.1609 10.1086L11.3309 14.9386C11.1909 15.0786 11.0009 15.1586 10.8009 15.1586C10.6009 15.1586 10.4109 15.0786 10.2709 14.9386L7.85086 12.5186C7.56086 12.2286 7.56086 11.7486 7.85086 11.4586C8.14086 11.1686 8.62086 11.1686 8.91086 11.4586L10.8009 13.3486L15.1009 9.04859C15.3909 8.75859 15.8709 8.75859 16.1609 9.04859C16.4509 9.33859 16.4509 9.81859 16.1609 10.1086Z"
+                    fill="${mock.verifyBadge === 1 ? '#1DA1F2' : mock.verifyBadge === 2 ? 'url(#goldGradient)' : 'url(#silverGradient)'}">
+                  </path>
+                </g>
+              </svg>
+              ` : ''
+              }
+          </div>
+          <h2 class="text-sm text-gray-500 truncate-text">@${mock.username}</h2>
+          <p class="text-gray-600 text-sm mt-2 break-words">${mock.slogan}</p>
+          <!-- Info -->
+          <div class="flex flex-wrap items-center gap-x-3 text-xs text-gray-500 mt-2">
+            <span class="whitespace-nowrap"><i class="fa-regular fa-flag mr-1"></i>Joined <a
+              href="https://4work.click" target="_blank" class="text-blue-600 hover:underline">4Work </a>in ${new Date(mock.createdAt).toLocaleString('default', { month: 'short', year: 'numeric' })}</span>
+            <span class="whitespace-nowrap"><i class="fa-solid fa-link mr-1"></i><a
+              href="https://${mock.systemDomain}/in/${mock.username}" target="_blank"
+              class="text-blue-600 hover:underline">${mock.systemDomain}/in/${mock.username}</a></span>
+          </div>
+        </div>
+      </div>
+    </div>
+      `;
+    };
+    // Xử lý sự kiện hover
+    const handleHover = async (event, userId) => {
+      const rect = event.target.getBoundingClientRect();
+      hoverCard.style.top = `${rect.bottom + window.scrollY + 5}px`;
+      hoverCard.style.left = `${rect.left + window.scrollX}px`;
+      hoverCard.innerHTML = '<p>Loading...</p>';
+      hoverCard.style.display = 'block';
+      const profileHtml = await fetchProfile(userId);
+      hoverCard.innerHTML = profileHtml;
+    };
+    // Gắn sự kiện cho các phần tử có class hover-trigger
+    const init = () => {
+      let isHoveringCard = false;
+      let timeout;
+      document.querySelectorAll('.hover-trigger').forEach(element => {
+        const userId = element.dataset.userId;
+        if (!userId) return;
+        element.addEventListener('mouseenter', (e) => {
+          console.log("mouseenter", userId);
+
+          clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            if (!isHoveringCard) handleHover(e, userId);
+          }, 300);
+        });
+        element.addEventListener('mouseleave', () => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            if (!isHoveringCard) {
+              hoverCard.style.display = 'none';
+              hoverCard.innerHTML = '';
+            }
+          }, 200);
+        });
+        hoverCard.addEventListener('mouseenter', () => {
+          clearTimeout(timeout);
+          isHoveringCard = true;
+        });
+        hoverCard.addEventListener('mouseleave', () => {
+          isHoveringCard = false;
+          timeout = setTimeout(() => {
+            hoverCard.style.display = 'none';
+            hoverCard.innerHTML = '';
+          }, 200);
+        });
+      });
+    };
+    return { init };
+  };
+  // Tự động khởi tạo hover card khi DOMContentLoaded
+  if (typeof window !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window._embed_profile_hover) {
+        window._embed_profile_hover().init();
+      }
+    });
+    window._embed_profile_hover = _embed_profile_hover;
+  }
+
+  function handleHoverImageError(imgElement, retryCallback) {
+    // Tạo container thay thế ảnh lỗi
+    const container = document.createElement('div');
+    container.className = (imgElement.className || '') + ' bg-gray-200 flex flex-col items-center justify-center cursor-pointer';
+    container.style.display = 'flex';
+    container.style.alignItems = 'center';
+    container.style.justifyContent = 'center';
+    container.style.background = '#f3f4f6'; 
+
+    // Copy kích thước nếu có
+    if (imgElement.width) container.style.width = imgElement.width + 'px';
+    if (imgElement.height) container.style.height = imgElement.height + 'px';
+    if (imgElement.style.width) container.style.width = imgElement.style.width;
+    if (imgElement.style.height) container.style.height = imgElement.style.height;
+
+    // Nếu có aspect ratio
+    const aspect = getComputedStyle(imgElement).aspectRatio;
+    if (aspect) container.style.aspectRatio = aspect;
+
+    // Nếu vẫn chưa có kích thước, set mặc định
+    if (!container.style.width) container.style.width = '100%';
+    if (!container.style.height) container.style.height = '200px';
+
+    // SVG reload icon
+    const reloadIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    reloadIcon.setAttribute('width', '32');
+    reloadIcon.setAttribute('height', '32');
+    reloadIcon.setAttribute('viewBox', '0 0 24 24');
+    reloadIcon.setAttribute('fill', 'none');
+    reloadIcon.innerHTML = `
+        <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4
+            c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8
+            c3.73 0 6.84-2.55 7.73-6h-2.08
+            A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6
+            s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"
+            fill="#4B5563"/>
+    `;
+
+    container.appendChild(reloadIcon);
+
+    // Khi click thì tạo ảnh mới và retry
+    container.addEventListener('click', () => {
+        const newImg = document.createElement('img');
+        newImg.src = imgElement.src;
+        newImg.alt = imgElement.alt;
+        newImg.className = imgElement.className;
+        newImg.style.cssText = imgElement.style.cssText;
+        newImg.onerror = () => handleHoverImageError(newImg, retryCallback);
+        if (imgElement.onclick) newImg.onclick = imgElement.onclick;
+        container.replaceWith(newImg);
+        if (retryCallback) retryCallback();
+    });
+
+    // Thay ảnh lỗi bằng container fallback
+    imgElement.replaceWith(container);
+}
+
+  function reloadHoverImage(img) {
+    const wrapper = img.closest('.relative') || img.parentElement;
+    if (!wrapper) return;
+    const fallback = wrapper.querySelector('.absolute.inset-0.z-20');
+    const skeleton = wrapper.querySelector('.skeleton');
+    if (!img || !fallback || !skeleton) return;
+    fallback.classList.add('hidden');
+    fallback.classList.remove('flex');
+    img.classList.remove('hidden');
+    img._isError = false;
+    skeleton.classList.remove('hidden');
+    const originalSrc = img.src.split('?')[0];
+    img.src = originalSrc + '?t=' + Date.now();
+  }
+
+  // Đảm bảo export ra window
+  if (typeof window !== 'undefined') {
+    window.handleHoverImageError = handleHoverImageError;
+    window.reloadHoverImage = reloadHoverImage;
+  }
+
   // Make available for both server and client
   if (typeof module !== 'undefined' && module.exports) {
     // Server-side (Node.js)
-    module.exports = { 
+    module.exports = {
       renderLogo,
       renderSimpleLogo,
       renderHeader,
