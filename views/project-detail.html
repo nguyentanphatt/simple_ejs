@@ -209,7 +209,7 @@
         document.getElementById('related-projects-container').innerHTML = relatedHTML;
 
         // Render User Info
-        const userHTML = window.renderUser({ project: projectData, info: infoData });
+        const userHTML = window.renderUser({ project: projectData });
         document.getElementById('user-container').innerHTML = userHTML;
 
         // Set current year after footer is rendered
