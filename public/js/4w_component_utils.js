@@ -392,6 +392,124 @@
     `;
   }
 
+  // Render Related Projects Component
+  function renderRelated({ relatedProject = [] } = {}) {
+    if (!relatedProject || relatedProject.length === 0) return '';
+    return `
+      <div class="flex flex-col gap-4 p-6 mt-12 max-w-4xl mx-auto">
+        <h2 class="flex gap-3 items-center justify-center text-lg font-bold">
+          Related Projects
+        </h2>
+        <ul class="grid grid-cols-1 xl:grid-cols-3 gap-y-10 gap-x-6 items-start">
+          ${relatedProject.map(project => {
+            const id = project._id && project._id.$oid ? project._id.$oid : project._id;
+            console.log("image", project.file);
+            const img = project.file || project.files[0].url
+            return `
+              <li class="relative flex flex-col sm:flex-row xl:flex-col items-start">
+                <div class="order-1 sm:ml-6 xl:ml-0">
+                  <h3 class="mb-1 text-slate-900 font-semibold">
+                    <span class="mb-1 block text-sm leading-6 text-indigo-500">${project.time || ''}</span>
+                    ${project.projectName && project.projectName.length > 50 ? project.projectName.substring(0, 50) + '...' : project.projectName || ''}
+                  </h3>
+                  <div class="prose prose-slate prose-sm text-slate-600">
+                    <p>${project.op_description && project.op_description.length > 150 ? project.op_description.substring(0, 150) + '...' : project.op_description || ''}</p>
+                  </div>
+                  
+                  <a class="group inline-flex items-center h-9 rounded-full text-sm font-semibold whitespace-nowrap px-3 focus:outline-none focus:ring-2 bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900 focus:ring-slate-500 mt-6" href="https://4work.click/projects/project-detail?id=${id}">
+                    Learn more
+                    <svg class="overflow-visible ml-3 text-slate-300 group-hover:text-slate-400" width="3" height="6" viewBox="0 0 3 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M0 0L3 3L0 6"></path>
+                    </svg>
+                  </a>
+                </div>
+                <img loading="lazy" onerror="handleImageError(this)" style="height: 25vh;" src="${img}" alt="${project.projectName || ''}" class="mb-6 shadow-md rounded-lg bg-slate-50 w-full sm:w-[300px] sm:h-auto xl:w-full xl:h-auto object-cover">
+              </li>
+            `;
+          }).join('')}
+        </ul>
+      </div>
+    `;
+  }
+
+  // Render User Info Component
+  function renderUser({ project = {}, info = {} } = {}) {
+    const userId = info.idUser && info.idUser._id ? info.idUser._id : '';
+    const userUrl = info.idUser && info.idUser.url ? info.idUser.url : '';
+    const userFullName = info.fullName || '';
+    const userAvatar = `https://cdn.4wk.vn/${userId}/favicon/57x57.png`;
+    const projectClicks = project.clicks || 0;
+    function formatViews(views) {
+      if (views === 1) return '1 View';
+      if (views >= 1e9) return (views / 1e9).toFixed(1) + 'B Views';
+      if (views >= 1e6) return (views / 1e6).toFixed(1) + 'M Views';
+      if (views >= 1e3) return (views / 1e3).toFixed(1) + 'K Views';
+      return views + ' Views';
+    }
+    // Format date
+    function formatDate(date) {
+      if (!date) return '';
+      try {
+        return new Date(date.$date || date).toLocaleString();
+      } catch {
+        return '';
+      }
+    }
+    return `
+      <div class="max-w-2xl px-6 py-6 mx-auto space-y-12">
+        <div class="w-full mx-auto space-y-4 text-center">
+        <h1 class="text-4xl font-bold leading-tight md:text-5xl">
+          ${project.projectName || ''}
+        </h1>
+        <p class="text-sm dark:text-gray-600">Created by
+          <a data-user-id="${userId}" rel="noopener noreferrer" href="https://${info.idUser && info.idUser.systemDomain ? info.idUser.systemDomain : '4work.click'}/${userUrl}" class="hover-trigger underline dark:text-violet-600">
+            <span itemprop="name" class="pr-1">
+              ${userFullName}
+            </span>
+          </a>on
+          <time>
+            ${formatDate(project.createdAt)}
+          </time>
+        </p>
+        ${project.updatedAt ? `
+        <p class="text-sm dark:text-gray-600">Last updated on 
+          <time>
+            ${formatDate(project.updatedAt)}
+          </time>
+        </p>
+        ` : ''}
+        <a href="https://4work.click/projects/rss/${userId}" target="_blank" rel="noopener noreferrer" class="text-orange-500 dark:text-orange-400 flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="w-[16px] h-[16px] fill-current">
+            <path d="M64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zM96 136c0-13.3 10.7-24 24-24c137 0 248 111 248 248c0 13.3-10.7 24-24 24s-24-10.7-24-24c0-110.5-89.5-200-200-200c-13.3 0-24-10.7-24-24zm0 96c0-13.3 10.7-24 24-24c83.9 0 152 68.1 152 152c0 13.3-10.7 24-24 24s-24-10.7-24-24c0-57.4-46.6-104-104-104c-13.3 0-24-10.7-24-24zm0 120a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"></path>
+          </svg>
+        </a>
+      </div>
+      <div class="flex items-center">
+        <a data-user-id="${userId}" class="hover-trigger" href="https://4work.click/verifybadge/${userId}" rel="noopener noreferrer">
+          <img class="skeleton w-12 h-12 object-cover rounded-full" onerror="this.src='https://cdn.4wk.vn/mainfiles/avatar-default.png';" src="${userAvatar}" alt="${userFullName}" />
+        </a>
+        <div class="ml-4">
+          <div class="flex items-center font-semibold">
+            <h4 class="capitalize">
+              <a data-user-id="${userId}" id="__user_fullName" href="https://4work.click/verifybadge/${userId}" class="hover-trigger text-inherit hover:underline" rel="noopener noreferrer" title="${userFullName}">
+                ${userFullName.length > 30 ? userFullName.substring(0, 30) + '...' : userFullName}
+              </a>
+            </h4>
+            <a id="__user_verified_badge" href="https://4work.click/docs/verified-badge.html" target="_blank" style="cursor: pointer;"></a>
+          </div>
+          <div class="flex items-center text-sm text-gray-400">
+            <p id="__user_url">@${userUrl}</p>
+            <span class="text-xs mx-2">•</span>
+            <span id="__project_clicks" class="text-xs">
+              ${projectClicks ? (projectClicks > 1 ? formatViews(projectClicks) : projectClicks + ' View') : '0 View'}
+            </span>
+          </div>
+        </div>
+      </div>
+      </div>
+    `;
+  }
+
   // Make available for both server and client
   if (typeof module !== 'undefined' && module.exports) {
     // Server-side (Node.js)
@@ -406,7 +524,9 @@
       renderButton,
       renderAttachment,
       renderCollaborator,
-      renderContact
+      renderContact,
+      renderRelated,
+      renderUser
     };
   } else {
     // Client-side (Browser)
@@ -423,5 +543,7 @@
     window.renderAttachment = renderAttachment;
     window.renderCollaborator = renderCollaborator;
     window.renderContact = renderContact;
+    window.renderRelated = renderRelated;
+    window.renderUser = renderUser;
   }
 })(); 

@@ -37,6 +37,11 @@
   <body>
     <div id="header-container"></div>
     <div class="min-h-screen">
+
+      <!-- User Info -->
+      <div id="user-container"></div>
+
+      <!-- Template Detail -->
       <section class="max-w-5xl mx-auto my-10 px-4 flex flex-col gap-10">
         <div class="max-w-3xl mx-auto flex flex-col gap-10">
           <h1 class="text-center text-4xl md:text-5xl font-bold">
@@ -51,8 +56,7 @@
             <%-project.projectOverview%>
           </p>
         </div>
-        
-      
+
         <!-- Ảnh chính -->
         <div id="main-image-container"></div>
 
@@ -80,6 +84,9 @@
 
       <!-- Contact -->  
       <div id="contact-container"></div>
+
+      <!-- Related Projects -->
+      <div id="related-projects-container"></div>
       </section>
 
       
@@ -90,13 +97,10 @@
 
     <script>
       // Server data
-      const projectData = {
-        files: JSON.parse('<%- JSON.stringify(project.files || []) %>'),
-        link: JSON.parse('<%- JSON.stringify(project.link || []) %>'),
-        collaborators: JSON.parse('<%- JSON.stringify(project.collaborators || []) %>'),
-        settings: JSON.parse('<%- JSON.stringify(project.settings || []) %>')
-      };
-
+      const projectData = JSON.parse(decodeURIComponent('<%- encodeURIComponent(JSON.stringify(project)) %>'));
+      const relatedProjectData = JSON.parse(decodeURIComponent('<%- encodeURIComponent(JSON.stringify(relatedProject || [])) %>'));
+      const infoData = JSON.parse(decodeURIComponent('<%- encodeURIComponent(JSON.stringify(info)) %>'));
+      
       // Helper function to check if file is image
       function isImage(filename) {
         const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg'];
@@ -198,6 +202,14 @@
         // Render Contact
         const contactHTML = window.renderContact({ project: projectData });
         document.getElementById('contact-container').innerHTML = contactHTML;
+
+        // Render Related Projects
+        const relatedHTML = window.renderRelated({ relatedProject: relatedProjectData });
+        document.getElementById('related-projects-container').innerHTML = relatedHTML;
+
+        // Render User Info
+        const userHTML = window.renderUser({ project: projectData, info: infoData });
+        document.getElementById('user-container').innerHTML = userHTML;
 
         // Set current year after footer is rendered
         setTimeout(() => {
