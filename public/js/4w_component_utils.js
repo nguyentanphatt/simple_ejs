@@ -124,7 +124,6 @@
           class="search-bar max-w-xs border border-gray-400 focus:border-gray-500 rounded bg-gray-200 px-4 text-center outline-none "
           type="search" 
           placeholder="${searchPlaceholder}">
-        <i class="fa fa-search absolute top-0 left-0 ml-12 mt-1"></i>
       </div>
     ` : '';
 
@@ -171,7 +170,6 @@
           class="search-bar ${maxWidth} border focus:border-gray-500 rounded bg-gray-200 px-4 text-center outline-none"
           type="search" 
           placeholder="${placeholder}">
-        <i class="fa fa-search absolute top-0 left-0 ml-12 mt-1"></i>
       </div>
     `;
   }
@@ -365,6 +363,212 @@
 
   function handleSignup() {
     window.location.href = 'https://app.4work.click/';
+  }
+
+  /**
+   * Load required libraries for email encryption
+   */
+  function loadEmailLibraries() {
+    // Load thư viện từ CDN ngay đầu file
+    const script1 = document.createElement('script');
+    script1.src = 'https://cdn.jsdelivr.net/npm/tweetnacl-util@0.15.1/nacl-util.min.js';
+    script1.onload = () => {
+        const script2 = document.createElement('script');
+        script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/tweetnacl/1.0.3/nacl.min.js';
+        script2.onload = () => {
+            console.log('Email encryption libraries loaded successfully');
+        };
+        document.head.appendChild(script2);
+    };
+    document.head.appendChild(script1);
+  }
+
+  /**
+   * Validate email format
+   */
+  function ValidateEmail(inputText) {
+    var mailformat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return mailformat.test(inputText);
+  }
+
+  /**
+   * Show alert message
+   */
+  function showAlert(message, type) {
+    let alert = document.createElement('div');
+    alert.classList.add(
+        'fixed', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2',
+        'px-5', 'py-3', 'max-w-md', 'w-full', 'rounded-lg', 'text-center', 'font-semibold',
+        'z-50', 'transition-transform', 'duration-500', 'ease-in-out', 'shadow-lg'
+    );
+
+    // Add icon for better visual feedback
+    let icon = '';
+    if (type === 'success') {
+        icon = '<i class="fas fa-check-circle"></i>';
+        alert.classList.add('bg-green-100', 'text-green-600');
+    } else if (type === 'error') {
+        icon = '<i class="fas fa-exclamation-circle"></i>';
+        alert.classList.add('bg-red-100', 'text-red-600');
+    }
+
+    alert.innerHTML = `
+        <div class="flex items-center justify-center space-x-3">
+            <div class="text-lg">
+                ${icon}
+            </div>
+            <div class="text-sm">
+                ${message}
+            </div>
+        </div>
+    `;
+
+    // Style customizations
+    alert.style.position = 'fixed';
+    alert.style.top = '50%';
+    alert.style.left = '50%';
+    alert.style.transform = 'translate(-50%, -50%)';
+    alert.style.padding = '16px';
+    alert.style.borderRadius = '8px';
+    alert.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.1)';
+    alert.style.zIndex = '9999';
+    alert.style.opacity = '0';
+    alert.style.transition = 'opacity 0.5s ease-in-out';
+
+    // Append the alert to the body
+    document.body.appendChild(alert);
+
+    // Fade in alert
+    setTimeout(() => {
+        alert.style.opacity = '1';
+    }, 10);
+
+    // Hide after 3 seconds
+    setTimeout(() => {
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500); // Remove from DOM after fade-out
+    }, 3000);
+  }
+
+  /**
+   * Encrypt data with public key
+   */
+  function encryptWithPublicKey(data, serverPublicKeyBase64) {
+    const serverPublicKey = nacl.util.decodeBase64(serverPublicKeyBase64); // Decode server public key
+
+    // Tạo nonce (24 bytes ngẫu nhiên)
+    const nonce = nacl.randomBytes(24);
+
+    // Tạo khóa ephemeral cho client
+    const ephemeralKeyPair = nacl.box.keyPair();
+
+    // Chuyển đổi dữ liệu JSON thành Uint8Array
+    const dataUint8Array = nacl.util.decodeUTF8(JSON.stringify(data));
+
+    // Mã hóa dữ liệu
+    const encrypted = nacl.box(
+        dataUint8Array,
+        nonce,
+        serverPublicKey,
+        ephemeralKeyPair.secretKey
+    );
+
+    return {
+        encryptedData: nacl.util.encodeBase64(encrypted),
+        nonce: nacl.util.encodeBase64(nonce),
+        ephemeralPublicKey: nacl.util.encodeBase64(ephemeralKeyPair.publicKey)
+    };
+  }
+
+  /**
+   * Collect and send email
+   */
+  async function collectemail() {
+    let __email = document.getElementById("__email");
+    let __subject = document.getElementById("__subject");
+    let __name = document.getElementById("__name");
+    let __message = document.getElementById("__message");
+    var element_uuiduser = document.getElementById("__uuiduser");
+    let __publicKey = element_uuiduser.getAttribute("value-publicKey");
+    let __idUser = element_uuiduser.getAttribute("value");
+    let __csrf = element_uuiduser.getAttribute("value-csrf");
+    let emailValue = __email.value;
+    let subjectValue = __subject.value;
+    let nameValue = __name.value;
+    let messageValue = __message.value;
+    let maxMessageLength = 6000;
+    let maxOtherFieldsLength = 200;
+    
+    if (!ValidateEmail(emailValue)) {
+        showAlert("Please enter a valid email address", 'error');
+        return;
+    }
+
+    if (!__idUser || !__publicKey) {
+        showAlert("Your session has expired", 'error');
+        return;
+    }
+
+    if (!emailValue || !messageValue || !subjectValue || !nameValue) {
+        showAlert("Please fill in all required fields", 'error');
+        return;
+    }
+    
+    if (messageValue.length > maxMessageLength) {
+        showAlert("Message cannot exceed 6000 characters", 'error');
+        return;
+    }
+    
+    if (emailValue.length > maxOtherFieldsLength || 
+        subjectValue.length > maxOtherFieldsLength || 
+        nameValue.length > maxOtherFieldsLength) {
+        showAlert("Each field (except message) cannot exceed 200 characters", 'error');
+        return;
+    }
+    
+    try {
+        // Encrypt the data with public key
+        const encryptedData = encryptWithPublicKey({
+            email: emailValue,
+            subject: subjectValue,
+            name: nameValue,
+            idUser: __idUser,
+            message: messageValue
+        }, __publicKey);
+
+        // Send encrypted data to the server
+        let response = await fetch("https://4work.click/api/mail", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                idUser: __idUser,
+                nonce: encryptedData.nonce,
+                data: encryptedData.encryptedData,
+                ephemeralPublicKey: encryptedData.ephemeralPublicKey,
+                token: '__token',
+                csrfToken : __csrf
+            })
+        });
+
+        if (response.status === 200) {
+            let data = await response.json();
+            if (data.success) {
+                showAlert("Your message has been sent successfully", 'success');
+                __email.value = '';
+                __subject.value = '';
+                __name.value = '';
+                __message.value = '';
+            } else {
+                showAlert(data.message || "Your message failed to send. Please try again", 'error');
+            }
+        } else {
+            showAlert("Your message failed to send. Please try again", 'error');
+        }
+    } catch (error) {
+        showAlert("There was an error sending your message. Please try again later", 'error');
+    }
   }
 
   /**
@@ -957,7 +1161,12 @@
       renderCollaborator,
       renderContact,
       renderRelated,
-      renderUser
+      renderUser,
+      loadEmailLibraries,
+      ValidateEmail,
+      showAlert,
+      encryptWithPublicKey,
+      collectemail
     };
   } else {
     // Client-side (Browser)
@@ -975,5 +1184,10 @@
     window.renderContact = renderContact;
     window.renderRelated = renderRelated;
     window.renderUser = renderUser;
+    window.loadEmailLibraries = loadEmailLibraries;
+    window.ValidateEmail = ValidateEmail;
+    window.showAlert = showAlert;
+    window.encryptWithPublicKey = encryptWithPublicKey;
+    window.collectemail = collectemail;
   }
 })(); 

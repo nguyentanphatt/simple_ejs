@@ -96,11 +96,6 @@
   </body>
     <script src="/js/_image_utils.js"></script>
     <script src="/js/4w_component_utils.js"></script>
-    <script type="text/javascript" src="https://cdn.4wk.vn/libs-js/sso_4work.js"></script>
-    <% if (project.settings && project.settings.quickContact) { %>
-      <script type="text/javascript" src="https://cdn.4wk.vn/libs-js/collectemail.js"></script>
-      <script type="text/javascript" src="https://cdn.4wk.vn/libs-js/sharing_embed.js"></script>
-    <% } %>
     <script>
       // Server data
       const projectData = JSON.parse(decodeURIComponent('<%- encodeURIComponent(JSON.stringify(project)) %>'));
