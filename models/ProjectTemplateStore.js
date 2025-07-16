@@ -18,12 +18,13 @@ const project_template_store_Schema = new mongoose.Schema({
     default: Date.now
   },
   images: [{
-    type: String, // Array of image URLs
+    type: String, // Array of image URLs or file paths
     validate: {
       validator: function(v) {
-        return /^https?:\/\/.+/.test(v); // Validate URL format
+        // Accept both URLs and relative paths
+        return /^(https?:\/\/.+|\/uploads\/.+)$/.test(v);
       },
-      message: 'Image must be a valid URL'
+      message: 'Image must be a valid URL or upload path'
     }
   }],
   data: {
@@ -41,21 +42,21 @@ const project_template_store_Schema = new mongoose.Schema({
     required: true
   }
 }, {
-  timestamps: true // Tự động thêm createdAt và updatedAt
+  timestamps: true
 });
 
-// Tạo indexes cho các trường thường được query
+// Create indexes for commonly queried fields
 project_template_store_Schema.index({ templateName: 1 });
 project_template_store_Schema.index({ category: 1 });
 project_template_store_Schema.index({ createdBy: 1 });
-project_template_store_Schema.index({ timestamp: -1 }); // Descending order for latest first
+project_template_store_Schema.index({ timestamp: -1 });
 
-// Virtual field để lấy id dưới dạng string
+// Virtual field to get id as string
 project_template_store_Schema.virtual('id').get(function() {
   return this._id.toHexString();
 });
 
-// Middleware để populate category khi query
+// Middleware to populate category when querying
 project_template_store_Schema.pre('find', function() {
   this.populate('category', 'name');
 });
@@ -64,7 +65,7 @@ project_template_store_Schema.pre('findOne', function() {
   this.populate('category', 'name');
 });
 
-// Đảm bảo virtual fields được serialize khi chuyển thành JSON
+// Ensure virtual fields are serialized when converting to JSON
 project_template_store_Schema.set('toJSON', {
   virtuals: true,
   transform: function(doc, ret) {
@@ -75,17 +76,17 @@ project_template_store_Schema.set('toJSON', {
   }
 });
 
-// Static method để tìm templates theo category
+// Static method to find templates by category
 project_template_store_Schema.statics.findByCategory = function(categoryId) {
   return this.find({ category: categoryId }).populate('category', 'name');
 };
 
-// Static method để tìm templates theo creator
+// Static method to find templates by creator
 project_template_store_Schema.statics.findByCreator = function(createdBy) {
   return this.find({ createdBy: createdBy }).populate('category', 'name');
 };
 
-// Instance method để update timestamp
+// Instance method to update timestamp
 project_template_store_Schema.methods.updateTimestamp = function() {
   this.timestamp = new Date();
   return this.save();

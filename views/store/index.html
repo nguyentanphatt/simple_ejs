@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-white">
+    <div class="py-5">
+        <div id="logo-container"></div>
+    </div>
+    <main>
+        <div class="text-center max-w-2xl mx-auto py-10">
+            <h2 class="text-2xl font-bold">
+                4WORK Blog Templates in 2025
+            </h2>
+            <p class="text-gray-600 mt-5">
+                Choose the perfect blog template to design your own storytelling space — from clean and minimal layouts
+                to visually rich and dynamic styles. Whether you're a travel blogger, food lover, tech enthusiast, or
+                personal journal keeper, our templates help you express your ideas beautifully, connect with readers,
+                and build your unique online presence.
+            </p>
+        </div>
+        <div id="template-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 px-4">
+            <% project.forEach(project => { %>
+                <div class="relative flex flex-col text-gray-700 bg-white shadow-md bg-clip-border rounded-xl w-90 mx-auto h-full hover:scale-105 transition-transform duration-300 cursor-pointer">
+                    <div
+                        class="relative mx-4 mt-4 overflow-hidden text-gray-700 bg-white bg-clip-border rounded-xl h-96">
+                        <img src="<%= project.images[0] %>"
+                            alt="card-image" class="object-cover w-full h-full" />
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="flex items-center justify-between mb-2">
+                            <p
+                                class="block font-sans text-base antialiased font-medium leading-relaxed text-blue-gray-900">
+                                <%= project.templateName %>
+                            </p>
+                        </div>
+                        <p
+                            class="block font-sans text-sm antialiased font-normal leading-normal text-gray-700 opacity-75">
+                            <%= project.description %>
+                        </p>
+                    </div>
+                    <div class="p-6 pt-0 flex justify-center items-center gap-4 mt-auto">
+                        <button class="w-[50%] bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                            Live Preview
+                        </button>
+                        <button class="w-[50%] bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                            Apply
+                        </button>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+        <div id="loading-indicator" class="text-center py-4 hidden">Loading...</div>
+        <div id="end-indicator" class="text-center py-4 hidden text-gray-500">End of data</div>
+    </main>
+</body>
+<script src="/js/4w_component_utils.js"></script>
+<script>
+    const logoContainer = document.getElementById("logo-container");
+    logoContainer.innerHTML = renderLogo({
+        url: "https://cdn.4wk.vn/mainfiles/logo/4WORK%20-%20LOGO%20SVG/4WORK%20LOGO%20-%20%20SVG-05.svg",
+        alt: "4work.click",
+        height: "h-10",
+        width: "w-auto",
+        bgColor: "bg-white",
+    });
+
+    let currentPage = 1;
+    let loading = false;
+    let hasNextPage = true;
+
+    async function loadMoreTemplates() {
+        if (loading || !hasNextPage) return;
+        loading = true;
+        document.getElementById('loading-indicator').classList.remove('hidden');
+        currentPage++;
+        const res = await fetch(`/api/store?page=${currentPage}`);
+        const data = await res.json();
+        setTimeout(() => {
+            hasNextPage = data.hasNextPage;
+            renderTemplates(data.templates);
+            loading = false;
+            document.getElementById('loading-indicator').classList.add('hidden');
+            if (!hasNextPage) {
+                document.getElementById('end-indicator').classList.remove('hidden');
+            }
+        }, 1000);
+    }
+
+    function renderTemplates(templates) {
+        const grid = document.getElementById('template-grid');
+        templates.forEach(project => {
+            const card = document.createElement('div');
+            card.className = "relative flex flex-col text-gray-700 bg-white shadow-md bg-clip-border rounded-xl w-90 mx-auto h-full hover:scale-105 transition-transform duration-300 cursor-pointer";
+            card.innerHTML = `
+                <div class="relative mx-4 mt-4 overflow-hidden text-gray-700 bg-white bg-clip-border rounded-xl h-96">
+                    <img src="${project.images[0]}" alt="card-image" class="object-cover w-full h-full" />
+                </div>
+                <div class="p-6 flex-1 flex flex-col">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="block font-sans text-base antialiased font-medium leading-relaxed text-blue-gray-900">
+                            ${project.templateName}
+                        </p>
+                    </div>
+                    <p class="block font-sans text-sm antialiased font-normal leading-normal text-gray-700 opacity-75">
+                        ${project.description}
+                    </p>
+                </div>
+                <div class="p-6 pt-0 flex justify-center items-center gap-4 mt-auto">
+                    <button class="w-[50%] bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">Live Preview</button>
+                    <button class="w-[50%] bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Apply</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // Infinite scroll
+    window.addEventListener('scroll', () => {
+        if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 200)) {
+            loadMoreTemplates();
+        }
+    });
+</script>
+
+</html>

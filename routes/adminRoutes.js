@@ -2,7 +2,9 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import models from '../models/index.js';
+import multer from 'multer';
 
+const upload = multer({ dest: 'uploads/' });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -11,8 +13,7 @@ const { project_template_category, project_template_store } = models;
 
 // Middleware to check if user is admin (you can add authentication here)
 const isAdmin = (req, res, next) => {
-    // Add your admin authentication logic here
-    // For now, we'll allow all requests
+    //admin authentication logic
     next();
 };
 
@@ -30,8 +31,6 @@ router.get('/categories', async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
         const skip = (page - 1) * limit;
-
-        // Get total count for pagination
         const totalCategories = await project_template_category.countDocuments();
         
         // Get categories with pagination
@@ -39,7 +38,7 @@ router.get('/categories', async (req, res) => {
             .find()
             .skip(skip)
             .limit(limit)
-            .sort({ createdAt: -1 }); // Sort by newest first
+            .sort({ createdAt: -1 });
 
         // Calculate pagination info
         const totalPages = Math.ceil(totalCategories / limit);
@@ -79,7 +78,6 @@ router.post('/categories/add', async (req, res) => {
     try {
         const { name } = req.body;
 
-        // Validate required fields
         if (!name || name.trim().length === 0) {
             return res.status(400).json({
                 success: false,
@@ -87,7 +85,6 @@ router.post('/categories/add', async (req, res) => {
             });
         }
 
-        // Check if category name already exists
         const existingCategory = await project_template_category.findOne({ name: name.trim() });
         if (existingCategory) {
             return res.status(400).json({
@@ -103,7 +100,6 @@ router.post('/categories/add', async (req, res) => {
 
         await newCategory.save();
 
-        // Redirect to categories list
         res.redirect('/admin/categories');
     } catch (error) {
         console.error('Add category error:', error);
@@ -111,6 +107,19 @@ router.post('/categories/add', async (req, res) => {
             success: false,
             message: 'Failed to create category'
         });
+    }
+});
+// Delete category
+router.delete('/categories/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deleted = await project_template_category.findByIdAndDelete(id);
+        if (!deleted) {
+            return res.status(404).json({ success: false, message: 'Category not found' });
+        }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Delete category failed' });
     }
 });
 
@@ -128,7 +137,7 @@ router.get('/templates', async (req, res) => {
             .populate('category', 'name')
             .skip(skip)
             .limit(limit)
-            .sort({ timestamp: -1 }); // Sort by newest first
+            .sort({ timestamp: -1 });
 
         // Calculate pagination info
         const totalPages = Math.ceil(totalTemplates / limit);
@@ -175,51 +184,61 @@ router.get('/templates/add', async (req, res) => {
 });
 
 // Add template POST
-router.post('/templates/add', async (req, res) => {
+router.post('/templates/add',upload.array('images'), async (req, res) => {
     try {
-        const { templateName, description, category, createdBy, data, images } = req.body;
-        
-        // Validate required fields
-        if (!templateName || !description || !category || !createdBy || !data) {
+        const { templateName, description, category, data, createdBy } = req.body;
+
+        if (!templateName || !description || !category || !data || !createdBy) {
             return res.status(400).json({
                 success: false,
                 message: 'All required fields must be provided'
             });
         }
-        
-        // Validate JSON data
-        try {
-            JSON.parse(data);
-        } catch (error) {
+
+        // Check if files were uploaded
+        if (!req.files || req.files.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid JSON data'
+                message: 'At least one image is required'
             });
         }
-        
-        // Create new template
+
+        // Extract filenames and create URLs from uploaded files
+        const images = req.files.map(file => `/uploads/${file.filename}`);
+
         const newTemplate = new project_template_store({
             templateName: templateName.trim(),
             description: description.trim(),
-            category: category,
+            category,
+            data,
             createdBy: createdBy.trim(),
-            data: data,
-            images: Array.isArray(images) ? images.filter(url => url.trim() !== '') : []
+            images
         });
-        
+
         await newTemplate.save();
-        
-        res.json({
-            success: true,
-            message: 'Template created successfully',
-            template: newTemplate
-        });
+
+        // Redirect về danh sách templates
+        res.redirect('/admin/templates');
     } catch (error) {
         console.error('Add template error:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to create template'
         });
+    }
+});
+
+// Delete template
+router.delete('/templates/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deleted = await project_template_store.findByIdAndDelete(id);
+        if (!deleted) {
+            return res.status(404).json({ success: false, message: 'Template not found' });
+        }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Delete template failed' });
     }
 });
 

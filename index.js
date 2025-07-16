@@ -17,13 +17,13 @@ async function startServer() {
     // Connect to MongoDB
     await connectDB();
     
-    // Middleware
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
     app.engine("html", ejs.renderFile);
     app.set("view engine", "html");
     app.set("views", "./views");
     app.use(express.static("public"));
+    app.use('/uploads', express.static('uploads'));
 
     // Routes
     app.use("/", router);
@@ -42,9 +42,9 @@ async function startServer() {
 
     app.listen(port, () => {
       console.log(`Server running at http://localhost:${port}`);
-      console.log(`Admin panel: http://localhost:${port}/admin/dashboard`);
+      console.log(`Admin panel: http://localhost:${port}/admin`);
     });
-  } catch (error) {
+  } catch (error) {s
     console.error('Failed to start server:', error);
     process.exit(1);
   }

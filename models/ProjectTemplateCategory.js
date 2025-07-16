@@ -8,18 +8,18 @@ const project_template_category_Schema = new mongoose.Schema({
     maxlength: 100
   }
 }, {
-  timestamps: true // Tự động thêm createdAt và updatedAt
+  timestamps: true
 });
 
-// Tạo index cho name để tìm kiếm nhanh hơn
+// Index for name
 project_template_category_Schema.index({ name: 1 });
 
-// Virtual field để lấy id dưới dạng string
+// Virtual field to get id as string
 project_template_category_Schema.virtual('id').get(function() {
   return this._id.toHexString();
 });
 
-// Đảm bảo virtual fields được serialize khi chuyển thành JSON
+// Ensure virtual fields are serialized when converting to JSON
 project_template_category_Schema.set('toJSON', {
   virtuals: true,
   transform: function(doc, ret) {

@@ -5,10 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Templates</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -105,10 +102,10 @@
         </header>
 
         <main class="p-6">
-            <form id="addCategoryForm" action="/admin/templates/add" method="POST" class="space-y-5">
+            <form id="addTemplateForm" action="/admin/templates/add" method="POST" class="space-y-5">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Template Name <span class="text-red-500">*</span></label>
-                    <input type="text" id="name" name="name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" placeholder="Enter template name">
+                    <label for="templateName" class="block text-sm font-medium text-gray-700 mb-1">Template Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="templateName" name="templateName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" placeholder="Enter template name">
                     <p id="nameError" class="text-red-500 text-xs mt-1 hidden">Template name is required.</p>
                 </div>
                 <div>
@@ -172,7 +169,8 @@
         <span id="toast-message"></span>
     </div>
 
-    <!-- JavaScript -->
+
+</body>
     <script>
         // Mobile menu toggle functionality
         const menuToggle = document.getElementById('menu-toggle');
@@ -185,11 +183,9 @@
             const isOpen = !sidebar.classList.contains('-translate-x-full');
 
             if (isOpen) {
-                // Close sidebar
                 sidebar.classList.add('-translate-x-full');
                 sidebarOverlay.classList.add('hidden');
             } else {
-                // Open sidebar
                 sidebar.classList.remove('-translate-x-full');
                 sidebarOverlay.classList.remove('hidden');
             }
@@ -201,11 +197,9 @@
             const chevron = document.getElementById(menuId + '-chevron');
             
             if (submenu.classList.contains('hidden')) {
-                // Open submenu
                 submenu.classList.remove('hidden');
                 chevron.style.transform = 'rotate(90deg)';
             } else {
-                // Close submenu
                 submenu.classList.add('hidden');
                 chevron.style.transform = 'rotate(0deg)';
             }
@@ -215,9 +209,9 @@
         menuToggle.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', toggleSidebar);
 
-        // Close sidebar on window resize (if screen becomes larger)
+        // Close sidebar on window resize 
         window.addEventListener('resize', () => {
-            if (window.innerWidth >= 768) { // md breakpoint
+            if (window.innerWidth >= 768) {
                 sidebar.classList.remove('-translate-x-full');
                 sidebarOverlay.classList.add('hidden');
             } else {
@@ -239,36 +233,93 @@
             }, 2500);
         }
 
-        document.getElementById('addCategoryForm').addEventListener('submit', async function(e) {
+        document.getElementById('addTemplateForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const nameInput = document.getElementById('name');
-            const name = nameInput.value.trim();
 
-            // Validate client
-            if (!name) {
-                showToast('Category name is required.');
+            const nameInput = document.getElementById('templateName');
+            const descriptionInput = document.getElementById('description');
+            const categoryInput = document.getElementById('category');
+            const dataInput = document.getElementById('data');
+            const createdByInput = document.getElementById('createdBy');
+            const imagesError = document.getElementById('imagesError');
+
+            let hasError = false;
+
+            // Validate Template Name
+            if (!nameInput.value.trim()) {
+                showToast('Template name is required.');
                 nameInput.classList.add('border-red-500');
-                return;
+                hasError = true;
+            } else {
+                nameInput.classList.remove('border-red-500');
             }
 
-            // Gửi POST bằng fetch
-            const res = await fetch('/admin/categories/add', {
+            // Validate Description
+            if (!descriptionInput.value.trim()) {
+                showToast('Description is required.');
+                descriptionInput.classList.add('border-red-500');
+                hasError = true;
+            } else {
+                descriptionInput.classList.remove('border-red-500');
+            }
+
+            // Validate Category
+            if (!categoryInput.value) {
+                showToast('Category is required.');
+                categoryInput.classList.add('border-red-500');
+                hasError = true;
+            } else {
+                categoryInput.classList.remove('border-red-500');
+            }
+
+            // Validate Data
+            if (!dataInput.value) {
+                showToast('Data is required.');
+                dataInput.classList.add('border-red-500');
+                hasError = true;
+            } else {
+                dataInput.classList.remove('border-red-500');
+            }
+
+            // Validate Created By
+            if (!createdByInput.value.trim()) {
+                showToast('Created By is required.');
+                createdByInput.classList.add('border-red-500');
+                hasError = true;
+            } else {
+                createdByInput.classList.remove('border-red-500');
+            }
+
+            // Validate Images
+            if (!imageFiles || imageFiles.length === 0) {
+                showToast('At least one image is required.');
+                imagesError.classList.remove('hidden');
+                hasError = true;
+            } else {
+                imagesError.classList.add('hidden');
+            }
+
+            if (hasError) return;
+
+            const formData = new FormData();
+            formData.append('templateName', nameInput.value.trim());
+            formData.append('description', descriptionInput.value.trim());
+            formData.append('category', categoryInput.value);
+            formData.append('data', dataInput.value);
+            formData.append('createdBy', createdByInput.value.trim());
+            imageFiles.forEach(file => formData.append('images', file));
+
+            const res = await fetch('/admin/templates/add', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({ name })
+                body: formData
             });
 
             if (res.redirected) {
-                // Nếu thành công, server sẽ redirect
                 window.location.href = res.url;
             } else {
-                // Nếu lỗi, server trả về JSON
                 const data = await res.json();
                 if (data && data.success === false) {
                     showToast(data.message);
-                    nameInput.classList.add('border-red-500');
                 }
             }
         });
@@ -277,7 +328,7 @@
         const uploadBox = document.getElementById('upload-box');
         const imagesInput = document.getElementById('images');
         const imageUploadArea = document.getElementById('image-upload-area');
-        let imageFiles = [];
+        let imageFiles = []; 
 
         uploadBox.addEventListener('click', () => imagesInput.click());
 
@@ -305,25 +356,7 @@
                 };
                 reader.readAsDataURL(file);
             });
-            // Reset input so user can re-upload same file if needed
             this.value = '';
         });
-
-        // On form submit, append images to FormData
-        document.getElementById('addTemplateForm').addEventListener('submit', function (e) {
-            if (imageFiles.length === 0) {
-                document.getElementById('imagesError').classList.remove('hidden');
-                e.preventDefault();
-                return;
-            }
-            document.getElementById('imagesError').classList.add('hidden');
-
-            // If using AJAX, build FormData and append images:
-            // const formData = new FormData(this);
-            // imageFiles.forEach(file => formData.append('images', file));
-            // ...submit formData via fetch...
-        });
     </script>
-</body>
-
 </html>
