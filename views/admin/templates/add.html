@@ -10,99 +10,31 @@
 </head>
 
 <body class="bg-gray-100">
-    <!-- Sidebar -->
-    <div id="sidebar"
-        class="fixed top-0 left-0 h-full w-64 bg-gray-800 text-white z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
-        <!-- Logo -->
-        <div class="p-4 border-b border-gray-700">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.href = '/admin'">
-                <img src="/images/4WORK%20LOGO%20-%20%20SVG-05.svg" alt="logo" width="100" height="50" />
-                <p class="text-base font-bold uppercase text-white">
-                    Template Manager
-                </p>
-            </div>
-        </div>
 
-        <!-- Navigation -->
-        <nav class="mt-4">
-            <div class="px-4 mb-4">
-                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Main</h3>
-            </div>
+    <!-- Sidebar Container -->
+    <div id="sidebar-container"></div>
 
-            <ul class="space-y-1">
-                <li>
-                    <div class="menu-item">
-                        <button class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors w-full" onclick="toggleSubmenu('categories')">
-                            <i class="fas fa-tags w-5 h-5 mr-3"></i>
-                            <span>Categories</span>
-                            <i class="fas fa-chevron-right ml-auto text-xs transition-transform duration-200" id="categories-chevron"></i>
-                        </button>
-                        <ul class="ml-8 mt-1 space-y-1 hidden" id="categories-submenu">
-                            <li>
-                                <a href="/admin/categories" class="block px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors">List</a>
-                            </li>
-                            <li>
-                                <a href="/admin/categories/add" class="block px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors">Add</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li>
-                    <div class="menu-item">
-                        <button class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors w-full" onclick="toggleSubmenu('templates')">
-                            <i class="fas fa-layer-group w-5 h-5 mr-3"></i>
-                            <span>Templates</span>
-                            <i class="fas fa-chevron-right ml-auto text-xs transition-transform duration-200" id="templates-chevron"></i>
-                        </button>
-                        <ul class="ml-8 mt-1 space-y-1 hidden" id="templates-submenu">
-                            <li>
-                                <a href="/admin/templates" class="block px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors">List</a>
-                            </li>
-                            <li>
-                                <a href="/admin/templates/add" class="block px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors">Add</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-            </ul>
-        </nav>
-    </div>
-
-    <!-- Overlay for mobile -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
-
+    <!-- Overlay Container -->
+    <div id="overlay-container"></div>
     <!-- Main Content -->
     <div id="main-content" class="md:ml-64 min-h-screen">
         <!-- Top Header -->
-        <header class="bg-white shadow-sm border-b border-gray-200">
-            <div class="flex items-center justify-between px-6 py-4">
-                <div class="flex flex-row items-center space-x-4">
-                    <!-- Mobile menu button -->
-                    <button id="menu-toggle" class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                    <div
-                        className="relative flex flex-wrap items-stretch w-[50%] md:w-full transition-all rounded-lg ease-soft">
-                        <input type="text"
-                            class="pl-4 text-sm focus:shadow-soft-primary-outline ease-soft leading-5.6 relative -ml-px block min-w-0 flex-auto rounded-lg border border-solid border-gray-300 bg-white bg-clip-padding py-2 pr-3 text-gray-700 transition-all placeholder:text-gray-500 focus:border-fuchsia-300 focus:outline-none focus:transition-shadow"
-                            placeholder="Type here..." />
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <button class="flex items-center space-x-2 text-gray-700 hover:text-gray-900">
-                            <img src="https://cdn.4wk.vn/mainfiles/avatar-default.png" alt="Avatar"
-                                class="w-8 h-8 rounded-full">
-                            <span>Admin</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </header>
+        <div id="header-container"></div>
 
         <main class="p-6">
-            <form id="addTemplateForm" action="/admin/templates/add" method="POST" class="space-y-5">
+            <div class="mb-6">
+                <h1 id="pageTitle" class="text-2xl font-bold text-gray-900">Add Template</h1>
+            </div>
+            
+            <form id="templateForm" action="/admin/templates/add" method="POST" class="space-y-5">
+                <!-- Hidden _id field for update operations -->
+                <input type="hidden" id="templateId" name="_id">
+                
+                <!-- Category ID display (only for update) -->
+                <div id="templateIdDisplay" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Template ID</label>
+                    <input type="text" id="templateIdInput" disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed" readonly>
+                </div>
                 <div>
                     <label for="templateName" class="block text-sm font-medium text-gray-700 mb-1">Template Name <span class="text-red-500">*</span></label>
                     <input type="text" id="templateName" name="templateName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" placeholder="Enter template name">
@@ -156,7 +88,7 @@
                     </div>
                     <p id="imagesError" class="text-red-500 text-xs mt-1 hidden">At least one image is required.</p>
                 </div>
-                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                <button id="submitBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
                     Add Template
                 </button>
             </form>
@@ -164,199 +96,298 @@
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed top-6 right-6 z-50 hidden min-w-[220px] bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 transition-all duration-300">
+    <div id="toast"
+        class="fixed top-6 right-6 z-50 hidden min-w-[220px] bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 transition-all duration-300">
         <i class="fas fa-exclamation-circle"></i>
         <span id="toast-message"></span>
     </div>
 
 
 </body>
-    <script>
-        // Mobile menu toggle functionality
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        const mainContent = document.getElementById('main-content');
+<script src="/js/admin_component_utils.js"></script>
+<script>
+    // Render admin components when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function () {
+        // Render sidebar
+        document.getElementById('sidebar-container').innerHTML = renderAdminSidebar();
 
-        // Toggle sidebar
-        function toggleSidebar() {
-            const isOpen = !sidebar.classList.contains('-translate-x-full');
+        // Render overlay
+        document.getElementById('overlay-container').innerHTML = renderSidebarOverlay();
 
-            if (isOpen) {
-                sidebar.classList.add('-translate-x-full');
-                sidebarOverlay.classList.add('hidden');
-            } else {
-                sidebar.classList.remove('-translate-x-full');
-                sidebarOverlay.classList.remove('hidden');
-            }
-        }
+        // Render header
+        document.getElementById('header-container').innerHTML = renderAdminHeader();
 
-        // Toggle submenu functionality
-        function toggleSubmenu(menuId) {
-            const submenu = document.getElementById(menuId + '-submenu');
-            const chevron = document.getElementById(menuId + '-chevron');
-            
-            if (submenu.classList.contains('hidden')) {
-                submenu.classList.remove('hidden');
-                chevron.style.transform = 'rotate(90deg)';
-            } else {
-                submenu.classList.add('hidden');
-                chevron.style.transform = 'rotate(0deg)';
-            }
-        }
+        // Initialize admin panel functionality
+        initAdminPanel();
+    });
 
-        // Event listeners
-        menuToggle.addEventListener('click', toggleSidebar);
-        sidebarOverlay.addEventListener('click', toggleSidebar);
+    // Check if this is an update operation
+    const urlParams = new URLSearchParams(window.location.search);
+    const templateId = urlParams.get('_id');
+    const isUpdate = templateId !== null;
+    
+    // Update page title and button text
+    const pageTitle = document.getElementById('pageTitle');
+    const submitBtn = document.getElementById('submitBtn');
+    const templateIdDisplay = document.getElementById('templateIdDisplay');
+    const templateIdInput = document.getElementById('templateIdInput');
+    const templateIdField = document.getElementById('templateId');
+    
+    if (isUpdate) {
+        pageTitle.textContent = 'Update Template';
+        submitBtn.textContent = 'Update Template';
+        templateIdDisplay.classList.remove('hidden');
+        templateIdInput.value = templateId;
+        templateIdField.value = templateId;
+        
+        // Load existing template data
+        loadTemplateData(templateId);
+    }
 
-        // Close sidebar on window resize 
-        window.addEventListener('resize', () => {
-            if (window.innerWidth >= 768) {
-                sidebar.classList.remove('-translate-x-full');
-                sidebarOverlay.classList.add('hidden');
-            } else {
-                sidebar.classList.add('-translate-x-full');
-                sidebarOverlay.classList.add('hidden');
-            }
-        });
-
-        // Toast function
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toast-message');
-            toastMsg.textContent = message;
-            toast.classList.remove('hidden');
-            toast.classList.add('opacity-100');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-                toast.classList.remove('opacity-100');
-            }, 2500);
-        }
-
-        document.getElementById('addTemplateForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const nameInput = document.getElementById('templateName');
-            const descriptionInput = document.getElementById('description');
-            const categoryInput = document.getElementById('category');
-            const dataInput = document.getElementById('data');
-            const createdByInput = document.getElementById('createdBy');
-            const imagesError = document.getElementById('imagesError');
-
-            let hasError = false;
-
-            // Validate Template Name
-            if (!nameInput.value.trim()) {
-                showToast('Template name is required.');
-                nameInput.classList.add('border-red-500');
-                hasError = true;
-            } else {
-                nameInput.classList.remove('border-red-500');
-            }
-
-            // Validate Description
-            if (!descriptionInput.value.trim()) {
-                showToast('Description is required.');
-                descriptionInput.classList.add('border-red-500');
-                hasError = true;
-            } else {
-                descriptionInput.classList.remove('border-red-500');
-            }
-
-            // Validate Category
-            if (!categoryInput.value) {
-                showToast('Category is required.');
-                categoryInput.classList.add('border-red-500');
-                hasError = true;
-            } else {
-                categoryInput.classList.remove('border-red-500');
-            }
-
-            // Validate Data
-            if (!dataInput.value) {
-                showToast('Data is required.');
-                dataInput.classList.add('border-red-500');
-                hasError = true;
-            } else {
-                dataInput.classList.remove('border-red-500');
-            }
-
-            // Validate Created By
-            if (!createdByInput.value.trim()) {
-                showToast('Created By is required.');
-                createdByInput.classList.add('border-red-500');
-                hasError = true;
-            } else {
-                createdByInput.classList.remove('border-red-500');
-            }
-
-            // Validate Images
-            if (!imageFiles || imageFiles.length === 0) {
-                showToast('At least one image is required.');
-                imagesError.classList.remove('hidden');
-                hasError = true;
-            } else {
-                imagesError.classList.add('hidden');
-            }
-
-            if (hasError) return;
-
-            const formData = new FormData();
-            formData.append('templateName', nameInput.value.trim());
-            formData.append('description', descriptionInput.value.trim());
-            formData.append('category', categoryInput.value);
-            formData.append('data', dataInput.value);
-            formData.append('createdBy', createdByInput.value.trim());
-            imageFiles.forEach(file => formData.append('images', file));
-
-            const res = await fetch('/admin/templates/add', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (res.redirected) {
-                window.location.href = res.url;
-            } else {
-                const data = await res.json();
-                if (data && data.success === false) {
-                    showToast(data.message);
+    // Load template data for update
+    async function loadTemplateData(id) {
+        try {
+            const response = await fetch(`/admin/templates/${id}`);
+            if (response.ok) {
+                const result = await response.json();
+                console.log('API Response:', result);
+    
+                let template;
+                if (result.success && result.data) {
+                    template = result.data;
+                } else {
+                    template = result; // Trường hợp response trực tiếp là template object
                 }
+
+                if (template.templateName) {
+                    document.getElementById('templateName').value = template.templateName;
+                }
+                if (template.description) {
+                    document.getElementById('description').value = template.description;
+                }
+                if (template.category) {
+                    // Kiểm tra nếu category là object có _id
+                    const categoryValue = template.category._id || template.category;
+                    document.getElementById('category').value = categoryValue;
+                }
+                if (template.data) {
+                    document.getElementById('data').value = template.data;
+                }
+                if (template.createdBy) {
+                    document.getElementById('createdBy').value = template.createdBy;
+                }
+                
+                // Fill form fields
+                if (template.templateName) {
+                    document.getElementById('templateName').value = template.templateName;
+                }
+                if (template.description) {
+                    document.getElementById('description').value = template.description;
+                }
+                console.log(template.category);
+                
+                if (template.category) {
+                    // Sử dụng _id hoặc id của category
+                    const categoryValue = template.category._id || template.category.id;
+                    document.getElementById('category').value = categoryValue;
+                }
+                if (template.data) {
+                    document.getElementById('data').value = template.data;
+                }
+                if (template.createdBy) {
+                    document.getElementById('createdBy').value = template.createdBy;
+                }
+                // Load existing images if any
+                if (template.images && template.images.length > 0) {
+                    template.images.forEach(imageUrl => {
+                        const preview = document.createElement('div');
+                        preview.className = 'relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center';
+                        preview.innerHTML = `
+                            <img src="${imageUrl}" class="object-cover w-full h-full" />
+                            <button type="button" class="absolute top-1 right-1 p-1 text-xs text-red-500" title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        // Remove image on click
+                        preview.querySelector('button').onclick = function () {
+                            imageUploadArea.removeChild(preview);
+                        };
+                        imageUploadArea.appendChild(preview);
+                    });
+                }
+            } else {
+                showToast('Failed to load template data', 'error');
             }
+        } catch (error) {
+            console.error('Error loading template:', error);
+            showToast('Error loading template data', 'error');
+        }
+    }
+
+    // Toast function
+    function showToast(message, type = 'error') {
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-message');
+        const toastIcon = document.getElementById('toast').querySelector('i');
+        
+        // Set message
+        toastMsg.textContent = message;
+        
+        // Set icon and background color based on type
+        if (type === 'success') {
+            toast.classList.remove('bg-red-500');
+            toast.classList.add('bg-green-500');
+            toastIcon.className = 'fas fa-check-circle';
+        } else {
+            toast.classList.remove('bg-green-500');
+            toast.classList.add('bg-red-500');
+            toastIcon.className = 'fas fa-exclamation-circle';
+        }
+        
+        toast.classList.remove('hidden');
+        toast.classList.add('opacity-100');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+            toast.classList.remove('opacity-100');
+        }, 2500);
+    }
+
+    document.getElementById('templateForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const nameInput = document.getElementById('templateName');
+        const descriptionInput = document.getElementById('description');
+        const categoryInput = document.getElementById('category');
+        const dataInput = document.getElementById('data');
+        const createdByInput = document.getElementById('createdBy');
+        const imagesError = document.getElementById('imagesError');
+
+        let hasError = false;
+
+        // Validate Template Name
+        if (!nameInput.value.trim()) {
+            showToast('Template name is required.', 'error');
+            nameInput.classList.add('border-red-500');
+            hasError = true;
+        } else {
+            nameInput.classList.remove('border-red-500');
+        }
+
+        // Validate Description
+        if (!descriptionInput.value.trim()) {
+            showToast('Description is required.', 'error');
+            descriptionInput.classList.add('border-red-500');
+            hasError = true;
+        } else {
+            descriptionInput.classList.remove('border-red-500');
+        }
+
+        // Validate Category
+        if (!categoryInput.value) {
+            showToast('Category is required.', 'error');
+            categoryInput.classList.add('border-red-500');
+            hasError = true;
+        } else {
+            categoryInput.classList.remove('border-red-500');
+        }
+
+        // Validate Data
+        if (!dataInput.value) {
+            showToast('Data is required.', 'error');
+            dataInput.classList.add('border-red-500');
+            hasError = true;
+        } else {
+            dataInput.classList.remove('border-red-500');
+        }
+
+        // Validate Created By
+        if (!createdByInput.value.trim()) {
+            showToast('Created By is required.', 'error');
+            createdByInput.classList.add('border-red-500');
+            hasError = true;
+        } else {
+            createdByInput.classList.remove('border-red-500');
+        }
+
+        // Validate Images (chỉ bắt buộc khi thêm mới)
+        if (!isUpdate && (!imageFiles || imageFiles.length === 0)) {
+            showToast('At least one image is required.', 'error');
+            imagesError.classList.remove('hidden');
+            hasError = true;
+        } else {
+            imagesError.classList.add('hidden');
+        }
+
+        if (hasError) return;
+
+        const formData = new FormData();
+        formData.append('templateName', nameInput.value.trim());
+        formData.append('description', descriptionInput.value.trim());
+        formData.append('category', categoryInput.value);
+        formData.append('data', dataInput.value);
+        formData.append('createdBy', createdByInput.value.trim());
+        if (imageFiles && imageFiles.length > 0) {
+            imageFiles.forEach(file => formData.append('images', file));
+        }
+
+        // Xác định endpoint và method
+        const endpoint = isUpdate ? `/admin/templates/update/${templateId}` : '/admin/templates/add';
+        const method = isUpdate ? 'PUT' : 'POST';
+
+        const res = await fetch(endpoint, {
+            method: method,
+            body: formData
         });
 
-        // Upload & preview images
-        const uploadBox = document.getElementById('upload-box');
-        const imagesInput = document.getElementById('images');
-        const imageUploadArea = document.getElementById('image-upload-area');
-        let imageFiles = []; 
+        if (res.redirected) {
+            window.location.href = res.url;
+        } else {
+            const data = await res.json();
+            if (data && data.success === false) {
+                showToast(data.message, 'error');
+            } else if (data && data.success === true) {
+                showToast(isUpdate ? 'Template updated successfully!' : 'Template added successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/admin/templates';
+                }, 1500);
+            }
+        }
+    });
 
-        uploadBox.addEventListener('click', () => imagesInput.click());
+    // Upload & preview images
+    const uploadBox = document.getElementById('upload-box');
+    const imagesInput = document.getElementById('images');
+    const imageUploadArea = document.getElementById('image-upload-area');
+    let imageFiles = [];
 
-        imagesInput.addEventListener('change', function () {
-            const files = Array.from(this.files);
-            files.forEach(file => {
-                if (!file.type.startsWith('image/')) return;
-                imageFiles.push(file);
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const preview = document.createElement('div');
-                    preview.className = 'relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center';
-                    preview.innerHTML = `
+    uploadBox.addEventListener('click', () => imagesInput.click());
+
+    imagesInput.addEventListener('change', function () {
+        const files = Array.from(this.files);
+        files.forEach(file => {
+            if (!file.type.startsWith('image/')) return;
+            imageFiles.push(file);
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const preview = document.createElement('div');
+                preview.className = 'relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center';
+                preview.innerHTML = `
                         <img src="${e.target.result}" class="object-cover w-full h-full" />
                         <button type="button" class="absolute top-1 right-1 p-1 text-xs text-red-500" title="Remove">
                             <i class="fas fa-times"></i>
                         </button>
                     `;
-                    // Remove image on click
-                    preview.querySelector('button').onclick = function () {
-                        imageUploadArea.removeChild(preview);
-                        imageFiles = imageFiles.filter(f => f !== file);
-                    };
-                    imageUploadArea.appendChild(preview);
+                // Remove image on click
+                preview.querySelector('button').onclick = function () {
+                    imageUploadArea.removeChild(preview);
+                    imageFiles = imageFiles.filter(f => f !== file);
                 };
-                reader.readAsDataURL(file);
-            });
-            this.value = '';
+                imageUploadArea.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
         });
-    </script>
+        this.value = '';
+    });
+</script>
+
 </html>

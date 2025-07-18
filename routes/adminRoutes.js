@@ -109,6 +109,88 @@ router.post('/categories/add', async (req, res) => {
         });
     }
 });
+
+// Get single category by ID
+router.get('/categories/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const category = await project_template_category.findById(id);
+        
+        if (!category) {
+            return res.status(404).json({
+                success: false,
+                message: 'Category not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: category
+        });
+    } catch (error) {
+        console.error('Get category error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to get category'
+        });
+    }
+});
+
+// Update category
+router.put('/categories/update/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name } = req.body;
+
+        if (!name || name.trim().length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Category name is required'
+            });
+        }
+
+        // Check if category exists
+        const existingCategory = await project_template_category.findById(id);
+        if (!existingCategory) {
+            return res.status(404).json({
+                success: false,
+                message: 'Category not found'
+            });
+        }
+
+        // Check if name already exists (excluding current category)
+        const duplicateCategory = await project_template_category.findOne({
+            name: name.trim(),
+            _id: { $ne: id }
+        });
+        
+        if (duplicateCategory) {
+            return res.status(400).json({
+                success: false,
+                message: 'Category name already exists'
+            });
+        }
+
+        // Update category
+        const updatedCategory = await project_template_category.findByIdAndUpdate(
+            id,
+            { name: name.trim() },
+            { new: true }
+        );
+
+        res.json({
+            success: true,
+            message: 'Category updated successfully',
+            data: updatedCategory
+        });
+    } catch (error) {
+        console.error('Update category error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update category'
+        });
+    }
+});
 // Delete category
 router.delete('/categories/:id', async (req, res) => {
     try {
@@ -183,6 +265,32 @@ router.get('/templates/add', async (req, res) => {
     }
 });
 
+// Get single template by ID
+router.get('/templates/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const template = await project_template_store.findById(id).populate('category', 'name _id');
+        
+        if (!template) {
+            return res.status(404).json({
+                success: false,
+                message: 'Template not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: template
+        });
+    } catch (error) {
+        console.error('Get template error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to get template'
+        });
+    }
+});
+
 // Add template POST
 router.post('/templates/add',upload.array('images'), async (req, res) => {
     try {
@@ -228,6 +336,61 @@ router.post('/templates/add',upload.array('images'), async (req, res) => {
     }
 });
 
+// Update template
+router.put('/templates/update/:id', upload.array('images'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { templateName, description, category, data, createdBy } = req.body;
+
+        if (!templateName || !description || !category || !data || !createdBy) {
+            return res.status(400).json({
+                success: false,
+                message: 'All required fields must be provided'
+            });
+        }
+
+        // Find existing template
+        const existingTemplate = await project_template_store.findById(id);
+        if (!existingTemplate) {
+            return res.status(404).json({
+                success: false,
+                message: 'Template not found'
+            });
+        }
+
+        // Handle images: nếu có ảnh mới thì thay thế, không thì giữ nguyên
+        let images = existingTemplate.images || [];
+        if (req.files && req.files.length > 0) {
+            images = req.files.map(file => `/uploads/${file.filename}`);
+        }
+
+        // Update template
+        const updatedTemplate = await project_template_store.findByIdAndUpdate(
+            id,
+            {
+                templateName: templateName.trim(),
+                description: description.trim(),
+                category,
+                data,
+                createdBy: createdBy.trim(),
+                images
+            },
+            { new: true }
+        );
+
+        res.json({
+            success: true,
+            message: 'Template updated successfully',
+            data: updatedTemplate
+        });
+    } catch (error) {
+        console.error('Update template error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update template'
+        });
+    }
+});
 // Delete template
 router.delete('/templates/:id', async (req, res) => {
     try {
