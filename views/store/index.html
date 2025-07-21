@@ -25,36 +25,43 @@
                 and build your unique online presence.
             </p>
         </div>
-        <div id="template-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 px-4">
-            <% project.forEach(project => { %>
-                <div class="relative flex flex-col text-gray-700 bg-white shadow-md bg-clip-border rounded-xl w-90 mx-auto h-full hover:scale-105 transition-transform duration-300 cursor-pointer">
+        <div id="template-grid"
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 px-4 max-w-[1200px] mx-auto">
+            <% project.forEach(project=> { %>
+                <div onclick="window.location.href='/templates/<%= project._id %>/index.html'"
+                    class="flex flex-col gap-2">
                     <div
-                        class="relative mx-4 mt-4 overflow-hidden text-gray-700 bg-white bg-clip-border rounded-xl h-96">
-                        <img src="<%= project.images[0] %>"
-                            alt="card-image" class="object-cover w-full h-full" />
+                        class="relative mx-2 mt-2 overflow-hidden text-gray-700 bg-white bg-clip-border rounded-xl h-70 shadow-md">
+                        <img src="<%= project.images[0] %>" alt="card-image" class="object-cover w-full h-full" />
                     </div>
-                    <div class="p-6 flex-1 flex flex-col">
-                        <div class="flex items-center justify-between mb-2">
+                    <div class="p-4 flex justify-between items-center w-full">
+                        <div class="flex flex-col gap-2 w-[70%]">
+                            <div class="flex items-center justify-between mb-2">
+                                <p
+                                    class="block font-sans text-base antialiased font-medium leading-relaxed text-blue-gray-900">
+                                    <%= project.templateName %>
+                                </p>
+                            </div>
                             <p
-                                class="block font-sans text-base antialiased font-medium leading-relaxed text-blue-gray-900">
-                                <%= project.templateName %>
+                                class="hidden block font-sans text-sm antialiased font-normal leading-normal text-gray-700 opacity-75 truncate ">
+                                <%= project.description %>
                             </p>
                         </div>
-                        <p
-                            class="block font-sans text-sm antialiased font-normal leading-normal text-gray-700 opacity-75">
-                            <%= project.description %>
-                        </p>
-                    </div>
-                    <div class="p-6 pt-0 flex justify-center items-center gap-4 mt-auto">
-                        <button class="w-[50%] bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                            Live Preview
-                        </button>
-                        <button class="w-[50%] bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
-                            Apply
-                        </button>
+                        <div class="flex items-center gap-2 w-[30%] justify-end">
+                            <a href="/product/get-shit-done-kit" class="inline-block bg-black/10 text-gray-600 font-normal text-sm leading-[1.42857] 
+          border border-white px-4 py-2 rounded-full opacity-80 hover:opacity-100 
+          transition duration-200" title="More Details">
+                                <i class="fa fa-align-left"></i>
+                            </a>
+                            <a href="/product/get-shit-done-kit" class="inline-block bg-black/10 text-gray-600 font-normal text-sm leading-[1.42857] 
+          border border-white px-4 py-2 rounded-full opacity-80 hover:opacity-100 
+          transition duration-200" title="More Details">
+                                <i class="fa fa-align-left"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
-            <% }); %>
+                <% }); %>
         </div>
         <div id="loading-indicator" class="text-center py-4 hidden">Loading...</div>
         <div id="end-indicator" class="text-center py-4 hidden text-gray-500">End of data</div>
@@ -62,6 +69,8 @@
 </body>
 <script src="/js/4w_component_utils.js"></script>
 <script>
+    console.log("project", project);
+    
     const logoContainer = document.getElementById("logo-container");
     logoContainer.innerHTML = renderLogo({
         url: "https://cdn.4wk.vn/mainfiles/logo/4WORK%20-%20LOGO%20SVG/4WORK%20LOGO%20-%20%20SVG-05.svg",
@@ -96,8 +105,13 @@
     function renderTemplates(templates) {
         const grid = document.getElementById('template-grid');
         templates.forEach(project => {
+            console.log("project", project);
+
             const card = document.createElement('div');
             card.className = "relative flex flex-col text-gray-700 bg-white shadow-md bg-clip-border rounded-xl w-90 mx-auto h-full hover:scale-105 transition-transform duration-300 cursor-pointer";
+            card.onclick = () => {
+                window.location.href = `/templates/${project.id}/index.html`;
+            };
             card.innerHTML = `
                 <div class="relative mx-4 mt-4 overflow-hidden text-gray-700 bg-white bg-clip-border rounded-xl h-96">
                     <img src="${project.images[0]}" alt="card-image" class="object-cover w-full h-full" />

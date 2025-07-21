@@ -33,10 +33,57 @@ function formatViews(views) {
   }
 }
 
-router.get("/project-detail", async (req, res) => {
+// Load 4 templates per page
+router.get("/store", async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = 4;
+  const skip = (page - 1) * limit;
+  const totalTemplates = await project_template_store.countDocuments();
+
+  // Get templates with pagination and populate category
+  const templates = await project_template_store
+    .find()
+    .populate('category', 'name')
+    .skip(skip)
+    .limit(limit)
+
+  res.render("store/index", {
+    project: templates
+  });
+});
+
+// Load more templates
+router.get("/api/store", async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = 6;
+  const skip = (page - 1) * limit;
+  const totalTemplates = await project_template_store.countDocuments();
+
+  const templates = await project_template_store
+    .find()
+    .populate('category', 'name')
+    .skip(skip)
+    .limit(limit)
+
+  const totalPages = Math.ceil(totalTemplates / limit);
+
+  res.json({
+    templates,
+    hasNextPage: page < totalPages
+  });
+});
+
+export default router;
+
+
+router.get("/templates/:id/index.html", async (req, res) => {
+  const { id } = req.params; // Lấy id từ URL
+  console.log("id", id);
+
   try {
-    // Lấy project theo id
+    // Lấy project theo id (nên dùng id này, không hardcode)
     const project = await bio_project.findById("67bd40f7c7a917aaa8603605").lean();
+    
 
     // Lấy 3 project đầu tiên làm related
     const relatedProject = await bio_project.find().limit(3).lean();
@@ -76,56 +123,17 @@ router.get("/project-detail", async (req, res) => {
       __v: 0
     };
 
-    res.render("project-detail", {
+    if (!project) {
+      return res.status(404).send("Project not found");
+    }
+
+    res.render(`templates/${id}/index.html`, {
       project,
       info,
       relatedProject,
     });
   } catch (err) {
+    console.error(err);
     res.status(500).send("Error loading project detail");
   }
 });
-
-// Load 4 templates per page
-router.get("/store", async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = 4;
-  const skip = (page - 1) * limit;
-  const totalTemplates = await project_template_store.countDocuments();
-
-  // Get templates with pagination and populate category
-  const templates = await project_template_store
-    .find()
-    .populate('category', 'name')
-    .skip(skip)
-    .limit(limit)
-    .sort({ timestamp: -1 });
-
-  res.render("store/index", {
-    project: templates
-  });
-});
-
-// Load more templates
-router.get("/api/store", async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = 4;
-  const skip = (page - 1) * limit;
-  const totalTemplates = await project_template_store.countDocuments();
-
-  const templates = await project_template_store
-    .find()
-    .populate('category', 'name')
-    .skip(skip)
-    .limit(limit)
-    .sort({ timestamp: -1 });
-
-  const totalPages = Math.ceil(totalTemplates / limit);
-
-  res.json({
-    templates,
-    hasNextPage: page < totalPages
-  });
-});
-
-export default router;

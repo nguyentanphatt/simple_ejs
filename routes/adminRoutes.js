@@ -29,7 +29,7 @@ router.get('/', (req, res) => {
 router.get('/categories', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = 5;
+        const limit = 8;
         const skip = (page - 1) * limit;
         const totalCategories = await project_template_category.countDocuments();
         
@@ -209,7 +209,7 @@ router.delete('/categories/:id', async (req, res) => {
 router.get('/templates', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = 5;
+        const limit = 8;
         const skip = (page - 1) * limit;
         const totalTemplates = await project_template_store.countDocuments();
         

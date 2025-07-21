@@ -24,98 +24,37 @@
         <!-- Page Content -->
         <main class="p-6">
             <div
-                class="relative flex flex-col w-full h-full overflow-scroll text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
-                <table class="w-full text-left table-auto min-w-max">
-                    <thead>
-                        <tr class="border-b border-slate-300 bg-slate-50">
-                            <th class="p-4 text-sm font-normal leading-none text-slate-500">STT</th>
-                            <th class="p-4 text-sm font-normal leading-none text-slate-500">Template Name</th>
-                            <th class="p-4 text-sm font-normal leading-none text-slate-500">Description</th>
-                            <th class="p-4 text-sm font-normal leading-none text-slate-500">Image</th>
-                            <th class="p-4 text-sm font-normal leading-none text-slate-500">Data Id</th>
-                            <th class="p-4 text-sm font-normal leading-none text-slate-500">Category</th>
-                            <th class="p-4 text-sm font-normal leading-none text-slate-500">Created By</th>
-                            <th class="p-4 text-sm font-normal leading-none text-slate-500">Created At</th>
-                            <th class="p-4 text-sm font-normal leading-none text-slate-500">Updated At</th>
-                            <th class="p-4 text-sm font-normal leading-none text-slate-500">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% templates.forEach((template, index) => { %>
-                            <tr class="hover:bg-slate-50">
-                                <td class="p-4 border-b border-slate-200 py-4">
-                                    <p class="text-sm text-slate-500"><%= pagination.startIndex + index %></p>
-                                </td>
-                                <td class="p-4 border-b border-slate-200 py-4">
-                                    <p class="block font-semibold text-sm text-slate-800"><%= template.templateName %></p>
-                                </td>
-                                <td class="p-4 border-b border-slate-200 py-4">
-                                    <p class="text-sm text-slate-500"><%= template.description %></p>
-                                </td>
-                                <td class="p-4 border-b border-slate-200 py-4">
-                                    <% if (template.images && template.images.length > 0) { %>
-                                        <img src="<%= template.images[0] %>" alt="<%= template.templateName %>" class="w-16 h-16 object-cover rounded" />
-                                    <% } else { %>
-                                        <div class="w-16 h-16 bg-slate-200 rounded flex items-center justify-center">
-                                            <i class="fas fa-image text-slate-400"></i>
-                                        </div>
-                                    <% } %>
-                                </td>
-                                <td class="p-4 border-b border-slate-200 py-4">
-                                    <p class="text-sm text-slate-500"><%= template.data %></p>
-                                </td>
-                                <td class="p-4 border-b border-slate-200 py-4">
-                                    <p class="text-sm text-slate-500"><%= template.category.name %></p>
-                                </td>
-                                <td class="p-4 border-b border-slate-200 py-4">
-                                    <p class="text-sm text-slate-500"><%= template.createdBy %></p>
-                                </td>
-                                <td class="p-4 border-b border-slate-200 py-4">
-                                    <p class="text-sm text-slate-500">
-                                        <% 
-                                        const createdDate = new Date(template.createdAt);
-                                        const createdFormatted = createdDate.toLocaleDateString('en-GB') + ' ' + 
-                                                               createdDate.toLocaleTimeString('en-GB', { 
-                                                                   hour: '2-digit', 
-                                                                   minute: '2-digit', 
-                                                                   second: '2-digit' 
-                                                               });
-                                        %>
-                                        <%= createdFormatted %>
-                                    </p>
-                                </td>
-                                <td class="p-4 border-b border-slate-200 py-4">
-                                    <p class="text-sm text-slate-500">
-                                        <% 
-                                        const updatedDate = new Date(template.updatedAt);
-                                        const updatedFormatted = updatedDate.toLocaleDateString('en-GB') + ' ' + 
-                                                               updatedDate.toLocaleTimeString('en-GB', { 
-                                                                   hour: '2-digit', 
-                                                                   minute: '2-digit', 
-                                                                   second: '2-digit' 
-                                                               });
-                                        %>
-                                        <%= updatedFormatted %>
-                                    </p>
-                                </td>
-                                <td class="p-4 border-b border-slate-200 py-4">
-                                    <button type="button" onclick="window.location.href='/admin/templates/add?_id=<%= template._id %>'" class="text-slate-500 hover:text-slate-700" data-id="<%= template._id %>">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 512 512" class="w-5 h-5">
-                                            <path d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/>
-                                        </svg>
+                class="relative flex flex-col w-full h-full text-gray-700 ">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 xl:gap-6 max-w-[1200px] mx-auto">
+                    <% templates.forEach((template, index) => { %>
+                        <!-- Card start -->
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden flex flex-col">
+                            <div class="relative h-40 bg-gray-100 flex items-center justify-center">
+                                <% if (template.images && template.images.length > 0) { %>
+                                    <img src="<%= template.images[0] %>" alt="<%= template.templateName %>" class="object-cover w-full h-full" />
+                                <% } else { %>
+                                    <i class="fas fa-image text-4xl text-slate-300"></i>
+                                <% } %>
+                            </div>
+                            <div class="p-2 xl:p-4 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <h3 class="font-semibold text-base text-slate-800 mb-1"><%= template.templateName %></h3>
+                                    <p class="text-xs text-slate-500 mb-1">Category: <%= template.category.name %></p>
+                                    <p class="text-xs text-slate-400">Data Id: <%= template.data %></p>
+                                </div>
+                                <div class="flex gap-2 mt-4">
+                                    <button type="button" onclick="window.location.href='/admin/templates/add?_id=<%= template._id %>'" class="text-slate-500 hover:text-slate-700" title="Edit">
+                                        <i class="fas fa-edit"></i>
                                     </button>
-                                    <button type="button" class="delete-template-btn text-slate-500 hover:text-slate-700" data-id="<%= template._id %>">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
+                                    <button type="button" class="delete-template-btn text-slate-500 hover:text-slate-700" data-id="<%= template._id %>" title="Delete">
+                                        <i class="fas fa-trash"></i>
                                     </button>
-                                </td>
-                            </tr>
-                        <% }) %>
-                        
-                    </tbody>
-                </table>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card end -->
+                    <% }) %>
+                </div>
             </div>
             <!-- Pagination -->
             <% if (pagination && pagination.totalPages > 1) { %>
