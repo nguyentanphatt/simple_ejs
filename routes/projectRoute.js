@@ -36,7 +36,7 @@ function formatViews(views) {
 // Load 4 templates per page
 router.get("/store", async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = 4;
+  const limit = 6;
   const skip = (page - 1) * limit;
   const totalTemplates = await project_template_store.countDocuments();
 
