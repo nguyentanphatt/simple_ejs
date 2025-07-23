@@ -54,7 +54,8 @@
                         <% if (project.images && project.images.length> 0) { %>
                             <img src="<%= project.images[0] %>" alt="card-image"
                                 class="object-cover w-full h-full slider-img"
-                                data-images='<%= JSON.stringify(project.images) %>' data-index="0" />
+                                data-images='<%= JSON.stringify(project.images) %>' data-index="0"
+                                onerror="this.onerror=null;this.src='https://cdn.4wk.vn/mainfiles/avatar-default.png';" />
                             <% if (project.images.length> 1) { %>
                                 <!-- Left button -->
                                 <button type="button"
@@ -106,6 +107,7 @@
                 <div class="flex flex-col items-center justify-between w-full ">
                     <div class="relative w-full h-48 md:h-64 lg:h-96 flex items-center justify-center mb-4">
                         <img id="modalImage" src="" alt="template image"
+                            onerror="this.onerror=null;this.src='https://cdn.4wk.vn/mainfiles/avatar-default.png';"
                             class="object-cover w-full h-full rounded-xl" />
                         <button type="button" id="modalPrevBtn"
                             class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full w-8 h-8 flex items-center justify-center text-lg hidden">
@@ -116,7 +118,7 @@
                             <i class="fa fa-chevron-right"></i>
                         </button>
                     </div>
-                    <button class="bg-gray-200 text-black px-4 py-2 rounded-lg cursor-pointer">
+                    <button class="bg-gray-200 text-black px-4 py-2 rounded-lg cursor-pointer live-preview-btn">
                         Live Preview
                     </button>
                 </div>
@@ -127,6 +129,7 @@
             </div>
         </div>
     </div>
+    <!-- Preview Modal -->
     <div id="preview-modal" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center hidden">
         <div class="relative w-full h-full flex items-center justify-center">
             <div id="preview-modal-content" class="w-[95vw] h-[95vh] bg-white rounded-lg overflow-auto shadow-lg"></div>
@@ -188,7 +191,8 @@
                     ${hasImages ? `
                         <img src="${project.images[0]}" alt="card-image"
                             class="object-cover w-full h-full slider-img"
-                            data-images='${JSON.stringify(project.images)}' data-index="0" />
+                            data-images='${JSON.stringify(project.images)}' data-index="0"
+                            onerror="this.onerror=null;this.src='https://cdn.4wk.vn/mainfiles/avatar-default.png';" />
                         ${hasMultipleImages ? `
                             <!-- Left button -->
                             <button type="button"
@@ -231,24 +235,24 @@
             loadMoreTemplates();
         }
     });
+
     // Image slider
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.slider-left, .slider-right').forEach(btn => {
             btn.addEventListener('click', function (e) {
                 const isLeft = btn.classList.contains('slider-left');
-                // Find img in card
                 const card = btn.closest('.relative');
                 const img = card.querySelector('.slider-img');
                 const images = JSON.parse(img.getAttribute('data-images'));
-                let index = parseInt(img.getAttribute('data-index'), 10);
+                let index = parseInt(img.getAttribute('data-index'));
 
                 if (isLeft) {
                     index = (index - 1 + images.length) % images.length;
                 } else {
                     index = (index + 1) % images.length;
                 }
-                img.src = images[index];
                 img.setAttribute('data-index', index);
+                setModalImageWithFallback(img, images[index] || '');
             });
         });
 
@@ -267,17 +271,23 @@
         // Open modal when click on image
         document.querySelectorAll('.relative.mx-2.mt-2').forEach(imgDiv => {
             imgDiv.addEventListener('click', function (e) {
-                // Tìm thẻ cha chứa data-template
                 const card = this.closest('.flex.flex-col[data-template]');
                 if (!card) return;
 
-                // Không mở modal nếu click vào nút chuyển ảnh
                 if (e.target.closest('.slider-left') || e.target.closest('.slider-right')) return;
 
                 const data = JSON.parse(card.getAttribute('data-template'));
+                const projectId = data._id;
+                document.querySelectorAll('.live-preview-btn').forEach(btn => {
+                    btn.addEventListener('click', async function (e) {
+                        e.stopPropagation();
+                        const projectId = data._id;
+                        openLivePreview(projectId);
+                    });
+                });
                 modalImages = data.images || [];
                 modalIndex = 0;
-                modalImage.src = modalImages[modalIndex] || '';
+                setModalImageWithFallback(modalImage, modalImages[modalIndex] || '');
                 modalName.textContent = data.name || '';
                 modalDesc.textContent = data.description || '';
 
@@ -302,12 +312,12 @@
         modalPrevBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             modalIndex = (modalIndex - 1 + modalImages.length) % modalImages.length;
-            modalImage.src = modalImages[modalIndex];
+            setModalImageWithFallback(modalImage, modalImages[modalIndex] || '');
         });
         modalNextBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             modalIndex = (modalIndex + 1) % modalImages.length;
-            modalImage.src = modalImages[modalIndex];
+            setModalImageWithFallback(modalImage, modalImages[modalIndex] || '');
         });
 
         // Live Preview
@@ -316,38 +326,14 @@
                 e.stopPropagation();
                 // Get projectId from data-template
                 const card = this.closest('.flex.flex-col[data-template]');
-                if (!card) return;
-                let projectId;
-                try {
-                    const data = JSON.parse(card.getAttribute('data-template'));
-                    projectId = data._id || data.id || data.templateId;
-                } catch {
-                    return;
-                }
-                if (!projectId) return;
-
-                // Show modal
-                const modal = document.getElementById('preview-modal');
-                const modalContent = document.getElementById('preview-modal-content');
-                modal.classList.remove('hidden');
-                modalContent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><div class="loader"></div></div>';
-
-                // Call API to get HTML
-                try {
-                    //Add 
-                    const res = await fetch(`/templates/${projectId}/index.html`);
-                    if (!res.ok) throw new Error('Không tải được trang preview');
-                    const html = await res.text();
-                    // Embed HTML into modal
-                    modalContent.innerHTML = `<iframe srcdoc="${html.replace(/"/g, '&quot;')}" class="w-full h-full border-0"></iframe>`;
-                } catch (err) {
-                    modalContent.innerHTML = '<div class="text-red-500 p-8">Không tải được trang preview</div>';
-                }
+                const data = JSON.parse(card.getAttribute('data-template'));
+                const projectId = data._id;
+                openLivePreview(projectId);
             });
         });
 
         // Close modal when click outside modal-content
-        document.getElementById('preview-modal').addEventListener('mousedown', function(e) {
+        document.getElementById('preview-modal').addEventListener('mousedown', function (e) {
             const modalContent = document.getElementById('preview-modal-content');
             if (!modalContent.contains(e.target)) {
                 this.classList.add('hidden');
@@ -355,4 +341,37 @@
             }
         });
     });
+
+    // Open live preview modal
+    function openLivePreview(projectId) {
+        if (!projectId) return;
+        const modal = document.getElementById('preview-modal');
+        const modalContent = document.getElementById('preview-modal-content');
+        modal.classList.remove('hidden');
+        modalContent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><div class="loader"></div></div>';
+        fetch(`/templates/${projectId}/index.html`)
+            .then(res => {
+                if (!res.ok) throw new Error('Không tải được trang preview');
+                return res.text();
+            })
+            .then(html => {
+                modalContent.innerHTML = `<iframe srcdoc="${html.replace(/"/g, '&quot;')}" class="w-full h-full border-0"></iframe>`;
+            })
+            .catch(() => {
+                modalContent.innerHTML = '<div class="text-red-500 p-8">Không tải được trang preview</div>';
+            });
+    }
+
+    // Set image with fallback
+    function setModalImageWithFallback(imgElement, newSrc) {
+        imgElement.onerror = null;
+        imgElement.src = '';
+        setTimeout(() => {
+            imgElement.onerror = function () {
+                this.onerror = null;
+                this.src = 'https://cdn.4wk.vn/mainfiles/avatar-default.png';
+            };
+            imgElement.src = newSrc;
+        }, 10);
+    }
 </script>
