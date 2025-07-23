@@ -101,8 +101,8 @@
     <!-- Modal Slide Up -->
     <div id="templateModal" class="fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-40 hidden">
         <div
-            class="w-full max-w-[1200px] h-[45%] md:h-[55%] xl:h-[65%] bg-white rounded-t-2xl shadow-lg p-2 flex flex-col relative animate-slideUp">
-            <div class="flex justify-between ">
+            class="w-full max-w-[1200px] h-full md:h-[55%] xl:h-[65%] bg-white md:rounded-t-2xl shadow-lg p-2 flex flex-col relative animate-slideUp">
+            <div class="flex flex-col gap-4 md:flex-row justify-between ">
                 <!-- Image slider -->
                 <div class="flex flex-col items-center justify-between w-full ">
                     <div class="relative w-full h-48 md:h-64 lg:h-96 flex items-center justify-center mb-4">
@@ -127,12 +127,18 @@
                     <p id="modalDesc" class="text-gray-600 px-4 md:px-10 text-center"></p>
                 </div>
             </div>
+            <button id="close-template-modal" class="absolute w-10 h-10 flex items-center justify-center top-4 right-4 z-10 bg-gray-100 rounded-full  shadow hover:bg-gray-200">
+              <i class="fa fa-times"></i>
+            </button>
         </div>
     </div>
     <!-- Preview Modal -->
     <div id="preview-modal" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center hidden">
         <div class="relative w-full h-full flex items-center justify-center">
-            <div id="preview-modal-content" class="w-[95vw] h-[95vh] bg-white rounded-lg overflow-auto shadow-lg"></div>
+            <button id="close-preview-modal" class="absolute w-10 h-10 flex items-center justify-center top-4 right-4 z-10 bg-white rounded-full shadow hover:bg-gray-200">
+                <i class="fa fa-times"></i>
+            </button>
+            <div id="preview-modal-content" class="w-full h-full bg-white rounded-lg overflow-auto shadow-lg"></div>
         </div>
     </div>
 </body>
@@ -308,6 +314,11 @@
             if (e.target === modal) modal.classList.add('hidden');
         });
 
+        // Close on button
+        document.getElementById('close-template-modal').addEventListener('click', function () {
+            document.getElementById('templateModal').classList.add('hidden');
+        });
+
         // Change image in modal
         modalPrevBtn.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -340,6 +351,13 @@
                 modalContent.innerHTML = '';
             }
         });
+
+        // Close preview modal
+        document.getElementById('close-preview-modal').addEventListener('click', function () {
+            document.getElementById('preview-modal').classList.add('hidden');
+            document.getElementById('preview-modal-content').innerHTML = '';
+        });
+
     });
 
     // Open live preview modal
