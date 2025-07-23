@@ -44,6 +44,7 @@
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 xl:gap-6 max-w-[1200px] mx-auto">
             <% project.forEach(project=> { %>
                 <div class="flex flex-col cursor-pointer" data-template='<%- JSON.stringify({
+                        _id: project._id,
                         name: project.templateName,
                         description: project.description,
                         images: project.images
@@ -78,7 +79,7 @@
                             </p>
                         </div>
                         <div class="flex items-center gap-2 w-[30%] justify-end">
-                            <button  class="w-10 h-10 flex items-center justify-center bg-black/10 text-gray-600 font-normal text-sm leading-[1.42857] 
+                            <button class="w-10 h-10 flex items-center justify-center bg-black/10 text-gray-600 font-normal text-sm leading-[1.42857] 
           border border-white px-4 py-2 rounded-full opacity-80 hover:opacity-100 
           transition duration-200" title="Live Preview">
                                 <i class="fa fa-eye"></i>
@@ -126,6 +127,11 @@
             </div>
         </div>
     </div>
+    <div id="preview-modal" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center hidden">
+        <div class="relative w-full h-full flex items-center justify-center">
+            <div id="preview-modal-content" class="w-[95vw] h-[95vh] bg-white rounded-lg overflow-auto shadow-lg"></div>
+        </div>
+    </div>
 </body>
 <script src="/js/4w_component_utils.js"></script>
 <script>
@@ -163,27 +169,56 @@
     function renderTemplates(templates) {
         const grid = document.getElementById('template-grid');
         templates.forEach(project => {
-            console.log("project", project);
+            // create data template
+            const dataTemplate = JSON.stringify({
+                _id: project._id || project.id,
+                name: project.templateName,
+                description: project.description,
+                images: project.images
+            });
+
+            const hasImages = project.images && project.images.length > 0;
+            const hasMultipleImages = hasImages && project.images.length > 1;
 
             const card = document.createElement('div');
-            card.className = "relative flex flex-col text-gray-700 bg-white shadow-md bg-clip-border rounded-xl w-90 mx-auto h-full hover:scale-105 transition-transform duration-300 cursor-pointer";
+            card.className = "flex flex-col cursor-pointer";
+            card.setAttribute('data-template', dataTemplate);
             card.innerHTML = `
-                <div class="relative mx-4 mt-4 overflow-hidden text-gray-700 bg-white bg-clip-border rounded-xl h-96">
-                    <img src="${project.images[0]}" alt="card-image" class="object-cover w-full h-full" />
+                <div class="relative mx-2 mt-2 overflow-hidden text-gray-700 bg-white bg-clip-border rounded-xl h-60 shadow-md group">
+                    ${hasImages ? `
+                        <img src="${project.images[0]}" alt="card-image"
+                            class="object-cover w-full h-full slider-img"
+                            data-images='${JSON.stringify(project.images)}' data-index="0" />
+                        ${hasMultipleImages ? `
+                            <!-- Left button -->
+                            <button type="button"
+                                class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition slider-left">
+                                <i class="fa fa-chevron-left"></i>
+                            </button>
+                            <!-- Right button -->
+                            <button type="button"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition slider-right">
+                                <i class="fa fa-chevron-right"></i>
+                            </button>
+                        ` : ''}
+                    ` : `
+                        <i class="fas fa-image text-4xl text-slate-300"></i>
+                    `}
                 </div>
-                <div class="p-6 flex-1 flex flex-col">
-                    <div class="flex items-center justify-between mb-2">
+                <div class="p-2 flex justify-between items-center w-full">
+                    <div class="flex flex-col gap-2 w-[70%]">
                         <p class="block font-sans text-base antialiased font-medium leading-relaxed text-blue-gray-900">
                             ${project.templateName}
                         </p>
                     </div>
-                    <p class="block font-sans text-sm antialiased font-normal leading-normal text-gray-700 opacity-75">
-                        ${project.description}
-                    </p>
-                </div>
-                <div class="p-6 pt-0 flex justify-center items-center gap-4 mt-auto">
-                    <button class="w-[50%] bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">Live Preview</button>
-                    <button class="w-[50%] bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Apply</button>
+                    <div class="flex items-center gap-2 w-[30%] justify-end">
+                        <button class="w-10 h-10 flex items-center justify-center bg-black/10 text-gray-600 font-normal text-sm leading-[1.42857] border border-white px-4 py-2 rounded-full opacity-80 hover:opacity-100 transition duration-200" title="Live Preview">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                        <button class="w-10 h-10 flex items-center justify-center bg-black/10 text-gray-600 font-normal text-sm leading-[1.42857] border border-white px-4 py-2 rounded-full opacity-80 hover:opacity-100 transition duration-200 apply-btn" data-id="${project._id || project.id}" title="Apply">
+                            <i class="fa fa-download"></i>
+                        </button>
+                    </div>
                 </div>
             `;
             grid.appendChild(card);
@@ -273,6 +308,51 @@
             e.stopPropagation();
             modalIndex = (modalIndex + 1) % modalImages.length;
             modalImage.src = modalImages[modalIndex];
+        });
+
+        // Live Preview
+        document.querySelectorAll('.fa-eye').forEach(icon => {
+            icon.closest('button').addEventListener('click', async function (e) {
+                e.stopPropagation();
+                // Get projectId from data-template
+                const card = this.closest('.flex.flex-col[data-template]');
+                if (!card) return;
+                let projectId;
+                try {
+                    const data = JSON.parse(card.getAttribute('data-template'));
+                    projectId = data._id || data.id || data.templateId;
+                } catch {
+                    return;
+                }
+                if (!projectId) return;
+
+                // Show modal
+                const modal = document.getElementById('preview-modal');
+                const modalContent = document.getElementById('preview-modal-content');
+                modal.classList.remove('hidden');
+                modalContent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><div class="loader"></div></div>';
+
+                // Call API to get HTML
+                try {
+                    //Add 
+                    const res = await fetch(`/templates/${projectId}/index.html`);
+                    if (!res.ok) throw new Error('Không tải được trang preview');
+                    const html = await res.text();
+                    // Embed HTML into modal
+                    modalContent.innerHTML = `<iframe srcdoc="${html.replace(/"/g, '&quot;')}" class="w-full h-full border-0"></iframe>`;
+                } catch (err) {
+                    modalContent.innerHTML = '<div class="text-red-500 p-8">Không tải được trang preview</div>';
+                }
+            });
+        });
+
+        // Close modal when click outside modal-content
+        document.getElementById('preview-modal').addEventListener('mousedown', function(e) {
+            const modalContent = document.getElementById('preview-modal-content');
+            if (!modalContent.contains(e.target)) {
+                this.classList.add('hidden');
+                modalContent.innerHTML = '';
+            }
         });
     });
 </script>

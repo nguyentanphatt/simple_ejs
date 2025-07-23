@@ -77,18 +77,15 @@ export default router;
 
 
 router.get("/templates/:id/index.html", async (req, res) => {
-  const { id } = req.params; // Lấy id từ URL
+  // get additional projectId
+  const { id } = req.params;
   console.log("id", id);
 
   try {
-    // Lấy project theo id (nên dùng id này, không hardcode)
+    //Change the hardcode id to projectId
     const project = await bio_project.findById("67bd40f7c7a917aaa8603605").lean();
-    
-
-    // Lấy 3 project đầu tiên làm related
     const relatedProject = await bio_project.find().limit(3).lean();
 
-    // Dữ liệu info userData cố định
     const info = {
       _id: { $oid: "67625275d65d4173604a4354" },
       twoFA: { login: 0, publishWebsite: 0 },
