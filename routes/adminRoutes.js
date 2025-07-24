@@ -257,8 +257,7 @@ router.get('/templates', async (req, res) => {
 router.get('/templates/add', async (req, res) => {
     try {
         const categories = await project_template_category.find();
-        const datas = await models.bio_project.find();
-        res.render('admin/templates/add', { categories, datas });
+        res.render('admin/templates/add', { categories });
     } catch (error) {
         console.error('Add template form error:', error);
         res.status(500).send('Failed to load add template form');
@@ -294,9 +293,9 @@ router.get('/templates/:id', async (req, res) => {
 // Add template POST
 router.post('/templates/add',upload.array('images'), async (req, res) => {
     try {
-        const { templateName, description, category, data, createdBy } = req.body;
+        const { templateName, description, category, createdBy } = req.body;
 
-        if (!templateName || !description || !category || !data || !createdBy) {
+        if (!templateName || !description || !category || !createdBy) {
             return res.status(400).json({
                 success: false,
                 message: 'All required fields must be provided'
@@ -318,7 +317,6 @@ router.post('/templates/add',upload.array('images'), async (req, res) => {
             templateName: templateName.trim(),
             description: description.trim(),
             category,
-            data,
             createdBy: createdBy.trim(),
             images
         });
@@ -340,9 +338,9 @@ router.post('/templates/add',upload.array('images'), async (req, res) => {
 router.put('/templates/update/:id', upload.array('images'), async (req, res) => {
     try {
         const { id } = req.params;
-        const { templateName, description, category, data, createdBy } = req.body;
+        const { templateName, description, category, createdBy } = req.body;
 
-        if (!templateName || !description || !category || !data || !createdBy) {
+        if (!templateName || !description || !category || !createdBy) {
             return res.status(400).json({
                 success: false,
                 message: 'All required fields must be provided'
@@ -371,7 +369,6 @@ router.put('/templates/update/:id', upload.array('images'), async (req, res) => 
                 templateName: templateName.trim(),
                 description: description.trim(),
                 category,
-                data,
                 createdBy: createdBy.trim(),
                 images
             },

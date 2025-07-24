@@ -38,9 +38,8 @@
                             </div>
                             <div class="p-2 xl:p-4 flex-1 flex flex-col justify-between">
                                 <div>
-                                    <h3 class="font-semibold text-base text-slate-800 mb-1"><%= template.templateName %></h3>
-                                    <p class="text-xs text-slate-500 mb-1">Category: <%= template.category.name %></p>
-                                    <p class="text-xs text-slate-400">Data Id: <%= template.data %></p>
+                                    <h3 class="font-semibold text-base text-slate-800 mb-1 line-clamp-2"><%= template.templateName %></h3>
+                                    <p class="text-xs text-slate-500 mb-1 line-clamp-1">Category: <%= template.category.name %></p>
                                 </div>
                                 <div class="flex gap-2 mt-4">
                                     <button type="button" onclick="window.location.href='/admin/templates/add?_id=<%= template._id %>'" class="text-slate-500 hover:text-slate-700" title="Edit">

@@ -25,9 +25,6 @@
 </head>
 
 <body class="bg-white">
-    <div class="py-5">
-        <div id="logo-container"></div>
-    </div>
     <main>
         <div class="text-center max-w-2xl mx-auto py-10">
             <h2 class="text-2xl font-bold">
@@ -40,63 +37,35 @@
                 and build your unique online presence.
             </p>
         </div>
+        <section class="pb-10 relative">
+            <div class="container mx-auto relative">
+                <div id="category_project" class="flex space-x-2 overflow-x-auto scrollbar-hide px-8">
+                    <button data-id="all"
+                        class="px-3 py-1 text-xs font-medium rounded bg-gray-200 text-gray-600 flex items-center space-x-2 hover:bg-gray-300 transition-colors category-btn active">
+                        <i class="fa-regular fa-folder"></i>
+                        <span class="block text-sm font-semibold">All (<%= templates.length %>)</span>
+                    </button>
+                    <% categories.forEach(function(category) { const count=templates.filter(p=>
+                        p.category &&
+                        (String(p.category._id || p.category) === String(category._id))
+                        ).length;
+                        %>
+                        <button data-id="<%= category._id %>" onclick="console.log('category', '<%= category._id %>')"
+                            class="px-3 py-1 text-xs font-medium rounded bg-gray-200 text-gray-600 flex items-center space-x-2 hover:bg-gray-300 transition-colors category-btn">
+                            <i class="fa-regular fa-folder"></i>
+                            <span class="block text-sm font-semibold">
+                                <%= category.name %> (<%= count %>)
+                            </span>
+                        </button>
+                        <% }) %>
+                </div>
+            </div>
+        </section>
         <div id="template-grid"
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 xl:gap-6 max-w-[1200px] mx-auto">
-            <% project.forEach(project=> { %>
-                <div class="flex flex-col cursor-pointer" data-template='<%- JSON.stringify({
-                        _id: project._id,
-                        name: project.templateName,
-                        description: project.description,
-                        images: project.images
-                    }) %>'>
-                    <div
-                        class="relative mx-2 mt-2 overflow-hidden text-gray-700 bg-white bg-clip-border rounded-xl h-60 shadow-md group">
-                        <% if (project.images && project.images.length> 0) { %>
-                            <img src="<%= project.images[0] %>" alt="card-image"
-                                class="object-cover w-full h-full slider-img"
-                                data-images='<%= JSON.stringify(project.images) %>' data-index="0"
-                                onerror="this.onerror=null;this.src='https://cdn.4wk.vn/mainfiles/avatar-default.png';" />
-                            <% if (project.images.length> 1) { %>
-                                <!-- Left button -->
-                                <button type="button"
-                                    class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition slider-left">
-                                    <i class="fa fa-chevron-left"></i>
-                                </button>
-                                <!-- Right button -->
-                                <button type="button"
-                                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition slider-right">
-                                    <i class="fa fa-chevron-right"></i>
-                                </button>
-                                <% } %>
-                                    <% } else { %>
-                                        <i class="fas fa-image text-4xl text-slate-300"></i>
-                                        <% } %>
-                    </div>
-                    <div class="p-2 flex justify-between items-center w-full">
-                        <div class="flex flex-col gap-2 w-[70%]">
-                            <p
-                                class="block font-sans text-base antialiased font-medium leading-relaxed text-blue-gray-900">
-                                <%= project.templateName %>
-                            </p>
-                        </div>
-                        <div class="flex items-center gap-2 w-[30%] justify-end">
-                            <button class="w-10 h-10 flex items-center justify-center bg-black/10 text-gray-600 font-normal text-sm leading-[1.42857] 
-          border border-white px-4 py-2 rounded-full opacity-80 hover:opacity-100 
-          transition duration-200" title="Live Preview">
-                                <i class="fa fa-eye"></i>
-                            </button>
-                            <button onclick="console.log('projectId', '<%= project._id %>')" class="w-10 h-10 flex items-center justify-center bg-black/10 text-gray-600 font-normal text-sm leading-[1.42857] 
-          border border-white px-4 py-2 rounded-full opacity-80 hover:opacity-100 
-          transition duration-200" title="Apply">
-                                <i class="fa fa-download"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <% }); %>
+
         </div>
         <div id="loading-indicator" class="text-center py-4 hidden">Loading...</div>
-        <div id="end-indicator" class="text-center py-4 hidden text-gray-500">End of data</div>
     </main>
     <!-- Modal Slide Up -->
     <div id="templateModal" class="fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-40 hidden">
@@ -127,15 +96,17 @@
                     <p id="modalDesc" class="text-gray-600 px-4 md:px-10 text-center"></p>
                 </div>
             </div>
-            <button id="close-template-modal" class="absolute w-10 h-10 flex items-center justify-center top-4 right-4 z-10 bg-gray-100 rounded-full  shadow hover:bg-gray-200">
-              <i class="fa fa-times"></i>
+            <button id="close-template-modal"
+                class="absolute w-10 h-10 flex items-center justify-center top-4 right-4 z-10 bg-gray-100 rounded-full  shadow hover:bg-gray-200">
+                <i class="fa fa-times"></i>
             </button>
         </div>
     </div>
     <!-- Preview Modal -->
     <div id="preview-modal" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center hidden">
         <div class="relative w-full h-full flex items-center justify-center">
-            <button id="close-preview-modal" class="absolute w-10 h-10 flex items-center justify-center top-4 right-4 z-10 bg-white rounded-full shadow hover:bg-gray-200">
+            <button id="close-preview-modal"
+                class="absolute w-10 h-10 flex items-center justify-center top-4 right-4 z-10 bg-white rounded-full shadow hover:bg-gray-200">
                 <i class="fa fa-times"></i>
             </button>
             <div id="preview-modal-content" class="w-full h-full bg-white overflow-auto shadow-lg"></div>
@@ -144,106 +115,91 @@
 </body>
 <script src="/js/4w_component_utils.js"></script>
 <script>
-    const logoContainer = document.getElementById("logo-container");
-    logoContainer.innerHTML = renderLogo({
-        url: "https://cdn.4wk.vn/mainfiles/logo/4WORK%20-%20LOGO%20SVG/4WORK%20LOGO%20-%20%20SVG-05.svg",
-        alt: "4work.click",
-        height: "h-10",
-        width: "w-auto",
-        bgColor: "bg-white",
-    });
-
-    let currentPage = 1;
-    let loading = false;
-    let hasNextPage = true;
-
-    async function loadMoreTemplates() {
-        if (loading || !hasNextPage) return;
-        loading = true;
-        document.getElementById('loading-indicator').classList.remove('hidden');
-        currentPage++;
-        const res = await fetch(`/api/store?page=${currentPage}`);
-        const data = await res.json();
-        setTimeout(() => {
-            hasNextPage = data.hasNextPage;
-            renderTemplates(data.templates);
-            loading = false;
-            document.getElementById('loading-indicator').classList.add('hidden');
-            if (!hasNextPage) {
-                document.getElementById('end-indicator').classList.remove('hidden');
-            }
-        }, 1000);
-    }
-    //render next template
-    function renderTemplates(templates) {
-        const grid = document.getElementById('template-grid');
-        templates.forEach(project => {
-            // create data template
-            const dataTemplate = JSON.stringify({
-                _id: project._id || project.id,
-                name: project.templateName,
-                description: project.description,
-                images: project.images
-            });
-
-            const hasImages = project.images && project.images.length > 0;
-            const hasMultipleImages = hasImages && project.images.length > 1;
-
-            const card = document.createElement('div');
-            card.className = "flex flex-col cursor-pointer";
-            card.setAttribute('data-template', dataTemplate);
-            card.innerHTML = `
-                <div class="relative mx-2 mt-2 overflow-hidden text-gray-700 bg-white bg-clip-border rounded-xl h-60 shadow-md group">
-                    ${hasImages ? `
-                        <img src="${project.images[0]}" alt="card-image"
-                            class="object-cover w-full h-full slider-img"
-                            data-images='${JSON.stringify(project.images)}' data-index="0"
-                            onerror="this.onerror=null;this.src='https://cdn.4wk.vn/mainfiles/avatar-default.png';" />
-                        ${hasMultipleImages ? `
-                            <!-- Left button -->
-                            <button type="button"
-                                class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition slider-left">
-                                <i class="fa fa-chevron-left"></i>
-                            </button>
-                            <!-- Right button -->
-                            <button type="button"
-                                class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition slider-right">
-                                <i class="fa fa-chevron-right"></i>
-                            </button>
-                        ` : ''}
-                    ` : `
-                        <i class="fas fa-image text-4xl text-slate-300"></i>
-                    `}
-                </div>
-                <div class="p-2 flex justify-between items-center w-full">
-                    <div class="flex flex-col gap-2 w-[70%]">
-                        <p class="block font-sans text-base antialiased font-medium leading-relaxed text-blue-gray-900">
-                            ${project.templateName}
-                        </p>
-                    </div>
-                    <div class="flex items-center gap-2 w-[30%] justify-end">
-                        <button class="w-10 h-10 flex items-center justify-center bg-black/10 text-gray-600 font-normal text-sm leading-[1.42857] border border-white px-4 py-2 rounded-full opacity-80 hover:opacity-100 transition duration-200" title="Live Preview">
-                            <i class="fa fa-eye"></i>
-                        </button>
-                        <button class="w-10 h-10 flex items-center justify-center bg-black/10 text-gray-600 font-normal text-sm leading-[1.42857] border border-white px-4 py-2 rounded-full opacity-80 hover:opacity-100 transition duration-200 apply-btn" data-id="${project._id || project.id}" title="Apply">
-                            <i class="fa fa-download"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-    }
-
-    // Infinite scroll
-    window.addEventListener('scroll', () => {
-        if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 200)) {
-            loadMoreTemplates();
+    const allTemplates = <%- JSON.stringify(templates) %>;
+    //Render 
+    function renderTemplates(templates, append = false) {
+        const templateGrid = document.getElementById('template-grid');
+        const html = templates.map(template => {
+            const categoryId = template.category && (template.category._id || template.category);
+            const images = template.images || [];
+            return `
+        <div class="flex flex-col cursor-pointer template-card"
+             data-category-id="${categoryId}"
+             data-template='${JSON.stringify({
+                 _id: template._id || template.id,
+                 name: template.templateName,
+                 description: template.description,
+                 images: template.images
+             })}'>
+          <div class="relative mx-2 mt-2 overflow-hidden text-gray-700 bg-white bg-clip-border rounded-xl h-60 shadow-md group">
+            ${images.length > 0 ? `
+              <img src="${images[0]}" alt="card-image"
+                class="object-cover w-full h-full slider-img"
+                data-images='${JSON.stringify(images)}' data-index="0"
+                onerror="this.onerror=null;this.src='https://cdn.4wk.vn/mainfiles/avatar-default.png';" />
+              ${images.length > 1 ? `
+                <button type="button" class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition slider-left">
+                  <i class="fa fa-chevron-left"></i>
+                </button>
+                <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition slider-right">
+                  <i class="fa fa-chevron-right"></i>
+                </button>
+              ` : ''}
+            ` : `<i class="fas fa-image text-4xl text-slate-300"></i>`}
+          </div>
+          <div class="p-2 flex justify-between items-center w-full">
+            <div class="flex flex-col gap-2 w-[70%]">
+              <p class="block font-sans text-base font-medium line-clamp-2">
+                ${template.templateName}
+              </p>
+            </div>
+            <div class="flex items-center gap-2 w-[30%] justify-end">
+              <button class="w-10 h-10 flex items-center justify-center bg-black/10 text-gray-600 border px-4 py-2 rounded-full opacity-80 hover:opacity-100 transition" title="Live Preview">
+                <i class="fa fa-eye"></i>
+              </button>
+              <button onclick="console.log('projectId', '${template._id}')" class="w-10 h-10 flex items-center justify-center bg-black/10 text-gray-600 border px-4 py-2 rounded-full opacity-80 hover:opacity-100 transition" title="Apply">
+                <i class="fa fa-download"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        `;
+        }).join('');
+        if (append) {
+            templateGrid.innerHTML += html;
+        } else {
+            templateGrid.innerHTML = html;
         }
+        attachCardEvents();
+    }
+
+    // Gọi hàm để hiển thị
+    document.addEventListener('DOMContentLoaded', function () {
+        // Render lần đầu
+        renderTemplates(allTemplates);
+
+        // Gán sự kiện filter cho các nút category
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const catId = this.getAttribute('data-id');
+                if (catId === 'all') {
+                    renderTemplates(allTemplates);
+                } else {
+                    const filtered = allTemplates.filter(project => {
+                        const projectCatId = project.category && (project.category.id || project.category._id || project.category);
+                        return String(projectCatId) === String(catId);
+                    });
+                    renderTemplates(filtered);
+                }
+            });
+        });
     });
 
     // Image slider
-    document.addEventListener('DOMContentLoaded', function () {
+    function attachCardEvents() {
+        // Slider
         document.querySelectorAll('.slider-left, .slider-right').forEach(btn => {
             btn.addEventListener('click', function (e) {
                 const isLeft = btn.classList.contains('slider-left');
@@ -262,6 +218,19 @@
             });
         });
 
+        // Live Preview
+        document.querySelectorAll('.template-card').forEach(card => {
+            const livePreviewBtn = card.querySelector('.fa-eye')?.closest('button');
+            if (livePreviewBtn) {
+                livePreviewBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const data = JSON.parse(card.getAttribute('data-template'));
+                    const projectId = data._id || data.id;
+                    openLivePreview(projectId);
+                });
+            }
+        });
+
         // Modal logic
         const modal = document.getElementById('templateModal');
         const modalImage = document.getElementById('modalImage');
@@ -277,7 +246,7 @@
         // Open modal when click on image
         document.querySelectorAll('.relative.mx-2.mt-2').forEach(imgDiv => {
             imgDiv.addEventListener('click', function (e) {
-                const card = this.closest('.flex.flex-col[data-template]');
+                const card = this.closest('.template-card');
                 if (!card) return;
 
                 if (e.target.closest('.slider-left') || e.target.closest('.slider-right')) return;
@@ -333,18 +302,6 @@
             setModalImageWithFallback(modalImage, modalImages[modalIndex] || '');
         });
 
-        // Live Preview
-        document.querySelectorAll('.fa-eye').forEach(icon => {
-            icon.closest('button').addEventListener('click', async function (e) {
-                e.stopPropagation();
-                // Get projectId from data-template
-                const card = this.closest('.flex.flex-col[data-template]');
-                const data = JSON.parse(card.getAttribute('data-template'));
-                const projectId = data._id;
-                openLivePreview(projectId);
-            });
-        });
-
         // Close modal when click outside modal-content
         document.getElementById('preview-modal').addEventListener('mousedown', function (e) {
             const modalContent = document.getElementById('preview-modal-content');
@@ -360,8 +317,7 @@
             document.getElementById('preview-modal-content').innerHTML = '';
             document.body.classList.remove('overflow-hidden');
         });
-
-    });
+    }
 
     // Open live preview modal
     async function openLivePreview(projectId) {
@@ -395,4 +351,46 @@
             imgElement.src = newSrc;
         }, 10);
     }
+
+    let currentPage = 1;
+    let loading = false;
+    let hasNextPage = true;
+
+    async function loadMoreTemplates() {
+        if (loading || !hasNextPage) return;
+        loading = true;
+        document.getElementById('loading-indicator').classList.remove('hidden');
+        currentPage++;
+        const res = await fetch(`/api/store?page=${currentPage}`);
+        const data = await res.json();
+        setTimeout(() => {
+            hasNextPage = data.hasNextPage;
+            // Thêm template mới vào allTemplates
+            allTemplates.push(...data.templates);
+
+            // Lấy category đang active
+            const activeCatBtn = document.querySelector('.category-btn.active');
+            const catId = activeCatBtn ? activeCatBtn.getAttribute('data-id') : 'all';
+
+            if (catId === 'all') {
+                renderTemplates(data.templates, true); // chỉ append project mới
+            } else {
+                // Chỉ append các project mới thuộc category đang chọn
+                const filtered = data.templates.filter(project => {
+                    const projectCatId = project.category && (project.category.id || project.category._id || project.category);
+                    return String(projectCatId) === String(catId);
+                });
+                renderTemplates(filtered, true); // append
+            }
+
+            loading = false;
+            document.getElementById('loading-indicator').classList.add('hidden');
+        }, 1000);
+    }
+
+    window.addEventListener('scroll', () => {
+        if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 200)) {
+            loadMoreTemplates();
+        }
+    });
 </script>

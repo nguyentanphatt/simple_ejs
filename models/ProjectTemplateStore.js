@@ -27,10 +27,6 @@ const project_template_store_Schema = new mongoose.Schema({
       message: 'Image must be a valid URL or upload path'
     }
   }],
-  data: {
-    type: String,
-    required: true
-  },
   createdBy: {
     type: String,
     required: true,

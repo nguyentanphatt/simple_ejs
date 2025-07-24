@@ -1,45 +1,16 @@
 import { Router } from "express";
-import fs from "fs";
-import path from "path";
 import models from '../models/index.js';
-const { bio_project, project_template_store } = models;
+const { bio_project, project_template_store, project_template_category } = models;
 const router = Router();
 
-function convertUserData(user) {
-  return {
-    idUser: {
-      _id: user._id && user._id.$oid ? user._id.$oid : user._id || "",
-      url: user.url || "",
-      verifyBadge: user.verifyBadge || 0,
-      key: {
-        public: user.key && user.key.public ? user.key.public : ""
-      }
-    },
-    fullName: user.googleName || ""
-  };
-}
-
-function formatViews(views) {
-  if (views === 1) {
-    return "1 View"; // Trường hợp đặc biệt khi chỉ có 1 lượt xem
-  } else if (views >= 1e9) {
-    return (views / 1e9).toFixed(1) + 'B Views';
-  } else if (views >= 1e6) {
-    return (views / 1e6).toFixed(1) + 'M Views';
-  } else if (views >= 1e3) {
-    return (views / 1e3).toFixed(1) + 'K Views';
-  } else {
-    return views + ' Views';
-  }
-}
 
 // Load 4 templates per page
 router.get("/store", async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = 8;
+  const limit = 5;
   const skip = (page - 1) * limit;
-  const totalTemplates = await project_template_store.countDocuments();
 
+  const categories = await project_template_category.find();
   // Get templates with pagination and populate category
   const templates = await project_template_store
     .find()
@@ -48,14 +19,15 @@ router.get("/store", async (req, res) => {
     .limit(limit)
 
   res.render("store/index", {
-    project: templates
+    templates: templates,
+    categories
   });
 });
 
 // Load more templates
 router.get("/api/store", async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = 8;
+  const limit = 5;
   const skip = (page - 1) * limit;
   const totalTemplates = await project_template_store.countDocuments();
 
