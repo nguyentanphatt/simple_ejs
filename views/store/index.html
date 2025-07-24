@@ -101,14 +101,14 @@
     <!-- Modal Slide Up -->
     <div id="templateModal" class="fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-40 hidden">
         <div
-            class="w-full max-w-[1200px] h-full md:h-[55%] xl:h-[65%] bg-white md:rounded-t-2xl shadow-lg p-2 flex flex-col relative animate-slideUp">
+            class="w-full max-w-[1200px] h-full md:h-[55%] xl:h-[65%] bg-white shadow-lg p-2 flex flex-col relative animate-slideUp">
             <div class="flex flex-col gap-4 md:flex-row justify-between ">
                 <!-- Image slider -->
                 <div class="flex flex-col items-center justify-between w-full ">
                     <div class="relative w-full h-48 md:h-64 lg:h-96 flex items-center justify-center mb-4">
                         <img id="modalImage" src="" alt="template image"
                             onerror="this.onerror=null;this.src='https://cdn.4wk.vn/mainfiles/avatar-default.png';"
-                            class="object-cover w-full h-full rounded-xl" />
+                            class="object-cover w-full h-full" />
                         <button type="button" id="modalPrevBtn"
                             class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full w-8 h-8 flex items-center justify-center text-lg hidden">
                             <i class="fa fa-chevron-left"></i>
@@ -138,7 +138,7 @@
             <button id="close-preview-modal" class="absolute w-10 h-10 flex items-center justify-center top-4 right-4 z-10 bg-white rounded-full shadow hover:bg-gray-200">
                 <i class="fa fa-times"></i>
             </button>
-            <div id="preview-modal-content" class="w-full h-full bg-white rounded-lg overflow-auto shadow-lg"></div>
+            <div id="preview-modal-content" class="w-full h-full bg-white overflow-auto shadow-lg"></div>
         </div>
     </div>
 </body>
@@ -306,6 +306,7 @@
                     modalNextBtn.classList.add('hidden');
                 }
                 modal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
             });
         });
 
@@ -317,6 +318,7 @@
         // Close on button
         document.getElementById('close-template-modal').addEventListener('click', function () {
             document.getElementById('templateModal').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
         });
 
         // Change image in modal
@@ -356,28 +358,29 @@
         document.getElementById('close-preview-modal').addEventListener('click', function () {
             document.getElementById('preview-modal').classList.add('hidden');
             document.getElementById('preview-modal-content').innerHTML = '';
+            document.body.classList.remove('overflow-hidden');
         });
 
     });
 
     // Open live preview modal
-    function openLivePreview(projectId) {
+    async function openLivePreview(projectId) {
         if (!projectId) return;
         const modal = document.getElementById('preview-modal');
         const modalContent = document.getElementById('preview-modal-content');
-        modal.classList.remove('hidden');
         modalContent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><div class="loader"></div></div>';
-        fetch(`/templates/${projectId}/index.html`)
-            .then(res => {
-                if (!res.ok) throw new Error('Không tải được trang preview');
-                return res.text();
-            })
-            .then(html => {
-                modalContent.innerHTML = `<iframe srcdoc="${html.replace(/"/g, '&quot;')}" class="w-full h-full border-0"></iframe>`;
-            })
-            .catch(() => {
-                modalContent.innerHTML = '<div class="text-red-500 p-8">Không tải được trang preview</div>';
-            });
+        document.body.classList.add('overflow-hidden');
+        try {
+            const res = await fetch(`/templates/${projectId}/index.html`);
+            if (!res.ok) throw new Error('Không tải được trang preview');
+            const html = await res.text();
+            modal.classList.remove('hidden');
+            modalContent.innerHTML = `<iframe srcdoc="${html.replace(/"/g, '&quot;')}" class="w-full h-full border-0"></iframe>`;
+        } catch (err) {
+            modal.classList.add('hidden');
+            modalContent.innerHTML = '';
+            document.body.classList.remove('overflow-hidden');
+        }
     }
 
     // Set image with fallback
