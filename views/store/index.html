@@ -173,12 +173,12 @@
         attachCardEvents();
     }
 
-    // Gọi hàm để hiển thị
+    // Call function when DOM is loaded 
     document.addEventListener('DOMContentLoaded', function () {
-        // Render lần đầu
+        // Render first time
         renderTemplates(allTemplates);
 
-        // Gán sự kiện filter cho các nút category
+        // Add event listener for category buttons
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', function () {
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -187,11 +187,12 @@
                 if (catId === 'all') {
                     renderTemplates(allTemplates);
                 } else {
-                    const filtered = allTemplates.filter(project => {
-                        const projectCatId = project.category && (project.category.id || project.category._id || project.category);
-                        return String(projectCatId) === String(catId);
-                    });
-                    renderTemplates(filtered);
+                    // Gọi API filter thay vì filter client-side
+                    fetch(`/api/store-filter?category=${catId}&page=1`)
+                        .then(res => res.json())
+                        .then(data => {
+                            renderTemplates(data.templates);
+                        });
                 }
             });
         });
@@ -365,22 +366,20 @@
         const data = await res.json();
         setTimeout(() => {
             hasNextPage = data.hasNextPage;
-            // Thêm template mới vào allTemplates
+            // Add new templates to allTemplates
             allTemplates.push(...data.templates);
 
-            // Lấy category đang active
             const activeCatBtn = document.querySelector('.category-btn.active');
             const catId = activeCatBtn ? activeCatBtn.getAttribute('data-id') : 'all';
 
             if (catId === 'all') {
-                renderTemplates(data.templates, true); // chỉ append project mới
+                renderTemplates(data.templates, true);
             } else {
-                // Chỉ append các project mới thuộc category đang chọn
-                const filtered = data.templates.filter(project => {
-                    const projectCatId = project.category && (project.category.id || project.category._id || project.category);
-                    return String(projectCatId) === String(catId);
-                });
-                renderTemplates(filtered, true); // append
+                fetch(`/api/store-filter?category=${catId}&page=${currentPage}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        renderTemplates(data.templates, true);
+                    });
             }
 
             loading = false;

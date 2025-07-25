@@ -45,6 +45,34 @@ router.get("/api/store", async (req, res) => {
   });
 });
 
+// API filter templates by category with paging
+router.get("/api/store-filter", async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = 8;
+  const skip = (page - 1) * limit;
+  const category = req.query.category;
+
+  let filter = {};
+  if (category && category !== 'all') {
+    filter.category = category;
+  }
+
+  const totalTemplates = await project_template_store.countDocuments(filter);
+
+  const templates = await project_template_store
+    .find(filter)
+    .populate('category', 'name')
+    .skip(skip)
+    .limit(limit);
+
+  const totalPages = Math.ceil(totalTemplates / limit);
+
+  res.json({
+    templates,
+    hasNextPage: page < totalPages
+  });
+});
+
 export default router;
 
 
