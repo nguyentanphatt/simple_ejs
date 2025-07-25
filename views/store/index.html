@@ -38,8 +38,8 @@
             </p>
         </div>
         <section class="pb-10 relative">
-            <div class="container mx-auto relative">
-                <div id="category_project" class="flex space-x-2 overflow-x-auto scrollbar-hide px-8">
+            <div class="max-w-[1200px] mx-auto relative">
+                <div id="category_project" class="flex flex-wrap gap-2 px-8 justify-center">
                     <button data-id="all"
                         class="px-3 py-1 text-xs font-medium rounded bg-gray-200 text-gray-600 flex items-center space-x-2 hover:bg-gray-300 transition-colors category-btn active">
                         <i class="fa-regular fa-folder"></i>
@@ -197,7 +197,7 @@
         });
     });
 
-    // Image slider
+    // Image slider and modal description
     function attachCardEvents() {
         // Slider
         document.querySelectorAll('.slider-left, .slider-right').forEach(btn => {
