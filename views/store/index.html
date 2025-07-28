@@ -21,6 +21,31 @@
         .animate-slideUp {
             animation: slideUp 0.3s cubic-bezier(.4, 0, .2, 1);
         }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
     </style>
 </head>
 
@@ -63,9 +88,16 @@
         </section>
         <div id="template-grid"
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 xl:gap-6 max-w-[1200px] mx-auto">
-
+            <!-- Initial loading spinner -->
+            <div id="initial-loading" class="col-span-full flex items-center justify-center py-20">
+                <div class="text-center">
+                    <div class="spinner"></div>
+                </div>
+            </div>
         </div>
-        <div id="loading-indicator" class="text-center py-4 hidden">Loading...</div>
+        <div id="loading-indicator" class="text-center py-4 hidden">
+            <div class="spinner"></div>
+        </div>
     </main>
     <!-- Modal Slide Up -->
     <div id="templateModal" class="fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-40 hidden">
@@ -175,22 +207,51 @@
 
     // Call function when DOM is loaded 
     document.addEventListener('DOMContentLoaded', function () {
+        // Hide initial loading spinner and render immediately
+        const initialLoading = document.getElementById('initial-loading');
+        if (initialLoading) {
+            initialLoading.style.display = 'none';
+        }
+        
         // Render first time
         renderTemplates(allTemplates);
 
         // Add event listener for category buttons
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', function () {
+                const initialLoading = document.getElementById('initial-loading');
+                if (initialLoading) {
+                    initialLoading.style.display = 'flex';
+                }
+                
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 const catId = this.getAttribute('data-id');
                 if (catId === 'all') {
-                    renderTemplates(allTemplates);
+                    fetch(`/api/store?page=1`)  
+                        .then(res => res.json())
+                        .then(data => {
+                            // Update allTemplates with new data
+                            allTemplates.length = 0;
+                            allTemplates.push(...data.templates);
+                            currentPage = 1;
+                            hasNextPage = data.hasNextPage; 
+                            
+                            const initialLoading = document.getElementById('initial-loading');
+                            if (initialLoading) {
+                                initialLoading.style.display = 'none';
+                            }
+                            renderTemplates(data.templates);
+                        });
                 } else {
                     // Gọi API filter thay vì filter client-side
                     fetch(`/api/store-filter?category=${catId}&page=1`)
                         .then(res => res.json())
                         .then(data => {
+                            const initialLoading = document.getElementById('initial-loading');
+                            if (initialLoading) {
+                                initialLoading.style.display = 'none';
+                            }
                             renderTemplates(data.templates);
                         });
                 }
@@ -366,7 +427,6 @@
         const data = await res.json();
         setTimeout(() => {
             hasNextPage = data.hasNextPage;
-            // Add new templates to allTemplates
             allTemplates.push(...data.templates);
 
             const activeCatBtn = document.querySelector('.category-btn.active');
@@ -384,7 +444,7 @@
 
             loading = false;
             document.getElementById('loading-indicator').classList.add('hidden');
-        }, 1000);
+        }, 500);
     }
 
     window.addEventListener('scroll', () => {
